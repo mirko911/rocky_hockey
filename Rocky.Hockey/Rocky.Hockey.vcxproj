@@ -84,7 +84,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;S:\Private\rocky.hockeyv3\Rocky.Hockey\Rocky.Hockey\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -115,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;S:\Private\rocky.hockeyv3\Rocky.Hockey\Rocky.Hockey\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -130,11 +130,9 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RockyHockeyMain.cpp" />
-    <ClCompile Include="RockyHockeyWorker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RockyHockeyMain.h" />
-    <ClInclude Include="RockyHockeyWorker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

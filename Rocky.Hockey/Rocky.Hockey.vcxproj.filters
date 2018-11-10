@@ -21,15 +21,9 @@
     <ClCompile Include="RockyHockeyMain.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="RockyHockeyWorker.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RockyHockeyMain.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="RockyHockeyWorker.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,6 +12,7 @@
 class RockyHockeyMain 
     : public std::enable_shared_from_this<RockyHockeyMain>
 {
+private:
     cv::VideoCapture m_caputreDevice;
     cv::Mat m_imgSrc;
     cv::Mat m_imgDst;

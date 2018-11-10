@@ -1,7 +1,5 @@
 #include "RockyHockeyMain.h"
 
-
-
 RockyHockeyMain::RockyHockeyMain(const std::string path) : m_caputreDevice(path)
 {
     std::cout << "[RockyHockeyMain] using a file as capture device" << std::endl;
@@ -20,29 +18,28 @@ RockyHockeyMain::RockyHockeyMain()
 
 void RockyHockeyMain::Init()
 {
-    if (!m_caputreDevice.isOpened()) {
+    if (!m_caputreDevice.isOpened())
+    {
         std::cerr << "[RockyHockeyMain] Can't open the video device" << std::endl;
         m_exit = true;
     }
 
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
-
-    //m_workerThread(&RockyHockeyMain::worker_thread, &this);
 }
 
 void RockyHockeyMain::Run()
 {
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point now;
-    int cnt = 0;
+
     int key = -1;
-    while (!m_exit) {
-       // key = cv::waitKey(1);
-        if (key > -1) {
+    while (!m_exit)
+    {
+        key = cv::waitKey(1);
+        if (key > -1)
+        {
             onKeyPress(key);
         }
-
-        cnt++;
 
         /*
        ==================================================
@@ -50,14 +47,12 @@ void RockyHockeyMain::Run()
        =================================================
        */
         now = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::microseconds>(now - lastTime).count() >= 1000000L) {
-            std::cout << "FPS: " << m_FPS << " " << cnt <<  std::endl;
+        if (std::chrono::duration_cast<std::chrono::microseconds>(now - lastTime).count() >= 1000000L)
+        {
+            std::cout << "FPS: " << m_FPS <<  std::endl;
             m_FPS = 0;
             lastTime = std::chrono::steady_clock::now();
-            cnt = 0;
         }
-
-
     }
 }
 
@@ -83,7 +78,8 @@ void RockyHockeyMain::worker_thread()
         target_delta /= targetFPS;
 
 
-    while (!m_exit) {
+    while (!m_exit)
+    {
         before = std::chrono::steady_clock::now();
 
         m_caputreDevice >> m_imgSrc;
@@ -92,7 +88,6 @@ void RockyHockeyMain::worker_thread()
             std::cerr << "[RockyHockeyWorker] image is empty" << std::endl;
             continue;
         }
-
 
         /*
         ==================================================
@@ -107,7 +102,8 @@ void RockyHockeyMain::worker_thread()
 
         // if the frame was processed faster than necessary, wait the some time to reach the target frame rate
         // if targetFPS is 0, don't wait
-        if (delta < target_delta && targetFPS > 0) {
+        if (delta < target_delta && targetFPS > 0)
+        {
             std::this_thread::sleep_for(target_delta - delta);
         }
     }
@@ -118,7 +114,8 @@ void RockyHockeyMain::onKeyPress(const int key)
     std::cout << "[RockyHockeyMain] onKeyPress. Detected key \"" << key << "\"" << std::endl;
     
     //@todo: implement
-    switch (key) {
+    switch (key)
+    {
     case '27':
         m_exit = true;
         break;
