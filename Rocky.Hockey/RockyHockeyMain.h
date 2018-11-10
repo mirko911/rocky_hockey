@@ -10,6 +10,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "Puck.h"
+#include "Tracker.h"
 
 class RockyHockeyMain 
     : public std::enable_shared_from_this<RockyHockeyMain>
@@ -20,6 +21,9 @@ private:
     cv::Mat m_imgDst;
     int m_FPS = 0;
     std::unique_ptr<std::thread> m_workerThread;
+
+    Puck m_puck;
+    Tracker m_tracker;
 public:
     bool m_exit = false;
 

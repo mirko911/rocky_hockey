@@ -24,6 +24,15 @@ void RockyHockeyMain::Init()
         m_exit = true;
     }
 
+    //Make sure that we have an image in imgSrc and imgDst,
+    //because we need the size to initialize the displayMat
+    m_caputreDevice >> m_imgSrc;
+    if (m_imgSrc.empty()) {
+        std::cerr << "[RockyHockeyMain] First frame is empty" << std::endl;
+        m_exit = true;
+    }
+    m_imgSrc.copyTo(m_imgDst);
+
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
 }
 
@@ -31,6 +40,9 @@ void RockyHockeyMain::Run()
 {
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point now;
+
+    cv::namedWindow("display", cv::WINDOW_FREERATIO | cv::WINDOW_OPENGL);
+    cv::Mat displayMat(m_imgSrc.size(), m_imgSrc.type());
 
     int key = -1;
     while (!m_exit)
@@ -40,6 +52,14 @@ void RockyHockeyMain::Run()
         {
             onKeyPress(key);
         }
+
+        {
+            std::mutex m;
+            std::lock_guard<std::mutex> lockGuard(m);
+            m_imgDst.copyTo(displayMat);
+        }
+
+        cv::imshow("display", displayMat);
 
         /*
        ==================================================
@@ -73,10 +93,11 @@ void RockyHockeyMain::worker_thread()
     std::chrono::duration<float> delta;
 
     // don't divide by zero
-    float targetFPS = 200;
+    float targetFPS = 30;
     if (targetFPS > 0)
         target_delta /= targetFPS;
 
+    cv::Mat workingImage;
 
     while (!m_exit)
     {
@@ -87,6 +108,19 @@ void RockyHockeyMain::worker_thread()
         if (m_imgSrc.empty()) {
             std::cerr << "[RockyHockeyWorker] image is empty" << std::endl;
             continue;
+        }
+
+        cv::cvtColor(m_imgSrc, workingImage, cv::COLOR_BGR2GRAY);
+        cv::GaussianBlur(workingImage, workingImage, cv::Size(3,3), 3, 3, 4);
+        workingImage = workingImage > 127;
+        m_tracker.Tick(workingImage, workingImage, m_puck);
+
+       // cv::adaptiveThreshold(workingImage, workingImage, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 71, 18);
+
+        {
+            std::mutex m;
+            std::lock_guard<std::mutex> lockGuard(m);
+            workingImage.copyTo(m_imgDst);
         }
 
         /*
