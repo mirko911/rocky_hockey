@@ -9,6 +9,7 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "definitions.h"
 #include "Puck.h"
 #include "Tracker.h"
 

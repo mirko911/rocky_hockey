@@ -93,9 +93,8 @@ void RockyHockeyMain::worker_thread()
     std::chrono::duration<float> delta;
 
     // don't divide by zero
-    float targetFPS = 30;
-    if (targetFPS > 0)
-        target_delta /= targetFPS;
+    if (config.targetFPS > 0)
+        target_delta /= static_cast<float>(config.targetFPS);
 
     cv::Mat workingImage;
 
@@ -136,7 +135,7 @@ void RockyHockeyMain::worker_thread()
 
         // if the frame was processed faster than necessary, wait the some time to reach the target frame rate
         // if targetFPS is 0, don't wait
-        if (delta < target_delta && targetFPS > 0)
+        if (delta < target_delta && config.targetFPS > 0)
         {
             std::this_thread::sleep_for(target_delta - delta);
         }

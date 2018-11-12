@@ -128,12 +128,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Prediction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Puck.cpp" />
     <ClCompile Include="RockyHockeyMain.cpp" />
     <ClCompile Include="Tracker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="definitions.h" />
+    <ClInclude Include="Prediction.h" />
     <ClInclude Include="Puck.h" />
     <ClInclude Include="RockyHockeyMain.h" />
     <ClInclude Include="Tracker.h" />
