@@ -17,7 +17,7 @@ class RockyHockeyMain
     : public std::enable_shared_from_this<RockyHockeyMain>
 {
 private:
-    cv::VideoCapture m_caputreDevice;
+    cv::VideoCapture m_captureDevice;
     cv::Mat m_imgSrc;
     cv::Mat m_imgDst;
     int m_FPS = 0;
@@ -25,8 +25,12 @@ private:
 
     Puck m_puck;
     Tracker m_tracker;
+
 public:
     bool m_exit = false;
+    int cannyLow = 176;
+    int cannyHigh = 216;
+    int cannyMax = 1000;
 
     RockyHockeyMain(const std::string path);
     RockyHockeyMain(const int camID);

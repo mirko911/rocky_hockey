@@ -1,13 +1,16 @@
 #include "RockyHockeyMain.h"
 
-RockyHockeyMain::RockyHockeyMain(const std::string path) : m_caputreDevice(path)
+RockyHockeyMain::RockyHockeyMain(const std::string path) : m_captureDevice(path)
 {
     std::cout << "[RockyHockeyMain] using a file as capture device" << std::endl;
 }
 
-RockyHockeyMain::RockyHockeyMain(const int camID) : m_caputreDevice(camID)
+RockyHockeyMain::RockyHockeyMain(const int camID) : m_captureDevice(camID)
 {
     std::cout << "[RockyHockeyMain] using webcam as capture device" << std::endl;
+    m_captureDevice.set(cv::CAP_PROP_FPS, 187);
+    m_captureDevice.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+    m_captureDevice.set(cv::CAP_PROP_FRAME_HEIGHT, 240);
 }
 
 RockyHockeyMain::RockyHockeyMain()
@@ -18,7 +21,7 @@ RockyHockeyMain::RockyHockeyMain()
 
 void RockyHockeyMain::Init()
 {
-    if (!m_caputreDevice.isOpened())
+    if (!m_captureDevice.isOpened())
     {
         std::cerr << "[RockyHockeyMain] Can't open the video device" << std::endl;
         m_exit = true;
@@ -26,7 +29,7 @@ void RockyHockeyMain::Init()
 
     //Make sure that we have an image in imgSrc and imgDst,
     //because we need the size to initialize the displayMat
-    m_caputreDevice >> m_imgSrc;
+    m_captureDevice >> m_imgSrc;
     if (m_imgSrc.empty()) {
         std::cerr << "[RockyHockeyMain] First frame is empty" << std::endl;
         m_exit = true;
@@ -43,6 +46,9 @@ void RockyHockeyMain::Run()
 
     cv::namedWindow("display", cv::WINDOW_FREERATIO | cv::WINDOW_OPENGL);
     cv::Mat displayMat(m_imgSrc.size(), m_imgSrc.type());
+
+    cv::createTrackbar("Canny Low", "display", &cannyLow, cannyMax);
+    cv::createTrackbar("Canny High", "display", &cannyHigh, cannyMax);
 
     int key = -1;
     while (!m_exit)
@@ -96,30 +102,37 @@ void RockyHockeyMain::worker_thread()
     if (config.targetFPS > 0)
         target_delta /= static_cast<float>(config.targetFPS);
 
-    cv::Mat workingImage;
-
+    cv::Mat workingImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
+    cv::Mat hsvImage = m_imgSrc.clone();
+    cv::Mat rgbImage = m_imgSrc.clone();
     while (!m_exit)
     {
         before = std::chrono::steady_clock::now();
 
-        m_caputreDevice >> m_imgSrc;
+        m_captureDevice >> m_imgSrc;
 
         if (m_imgSrc.empty()) {
             std::cerr << "[RockyHockeyWorker] image is empty" << std::endl;
             continue;
         }
 
+        m_imgDst = m_imgSrc.clone();
+
+
         cv::cvtColor(m_imgSrc, workingImage, cv::COLOR_BGR2GRAY);
-        cv::GaussianBlur(workingImage, workingImage, cv::Size(3,3), 3, 3, 4);
-        workingImage = workingImage > 127;
-        m_tracker.Tick(workingImage, workingImage, m_puck);
+        //cv::inRange(hsvImage, cv::Scalar(0, 100, 150), cv::Scalar(179, 255, 255), hsvImage);
+        //hsvImage.copyTo(workingImage);
+        cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
+        cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
+
+        m_tracker.Tick(workingImage, m_imgDst, m_puck);
 
        // cv::adaptiveThreshold(workingImage, workingImage, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 71, 18);
 
         {
             std::mutex m;
             std::lock_guard<std::mutex> lockGuard(m);
-            workingImage.copyTo(m_imgDst);
+            //workingImage.copyTo(m_imgDst);
         }
 
         /*

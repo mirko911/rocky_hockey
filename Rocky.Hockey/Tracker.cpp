@@ -22,6 +22,55 @@ Tracker::Tracker()
 
 void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 {
+    std::vector < cv::Vec3f > circles;
+
+    //https://dsp.stackexchange.com/questions/22648/in-opecv-function-hough-circles-how-does-parameter-1-and-2-affect-circle-detecti
+    /// Apply the Hough Transform to find the circles
+    cv::HoughCircles(src, circles, cv::HOUGH_GRADIENT, 1.0, src.rows/8, 186, 12, 6, 10);
+
+    /// Draw the circles detected
+    for (size_t i = 0; i < circles.size(); i++)
+    {
+        cv::Point center(circles[i][0], circles[i][1]);
+        int radius = circles[i][2];
+
+        std::cout << center << " " << radius << std::endl;
+
+        // circle center
+        //circle(dst, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+        // circle outline
+        circle(dst, center, radius, cv::Scalar(0, 0, 255), 1, 8, 0);
+
+        Vector oldPosition = puck.getPosition();
+        Vector position(center.x, center.y);
+
+        puck.setPosition(position);
+
+        Vector newDirection = Vector((position - oldPosition));
+
+        Vector directionBlend = (newDirection + puck.getDirection() + puck.getDirection()) * 0.333f;
+        std::cout << "Squared diff " << (puck.getDirection() - directionBlend).squaredNorm() << std::endl;
+        
+        puck.setDirection(directionBlend);
+
+
+#ifdef _DEBUG
+        Vector arrowPos = position + (puck.getDirection() * 100);
+        cv::arrowedLine(
+            dst,
+            cv::Point(position.x(), position.y()),
+            cv::Point(arrowPos.x(), arrowPos.y()),
+            cv::Scalar(255, 0, 0),
+            2,
+            8,
+            0,
+            0.1f
+        );
+#endif
+    }
+    /*
+
+
     std::vector<cv::KeyPoint> keypoints;
     m_detector->detect(src, keypoints);
 
@@ -55,6 +104,7 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 #endif
     }
 
+    */
 }
 
 
