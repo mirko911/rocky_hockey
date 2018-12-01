@@ -18,16 +18,21 @@ void Puck::setRadius(const float radius)
 void Puck::setPosition(const Vector & position)
 {
     m_position = position;
-    m_positionQueue.push(position);
+    m_positionQueue.push_back(position);
     if (m_positionQueue.size() > m_queueLimit)
     {
-        m_positionQueue.pop();
+        m_positionQueue.pop_front();
     }
 }
 
 void Puck::setDirection(const Vector & direction)
 {
     m_direction = direction.normalized();
+    m_directionQueue.push_back(m_direction);
+    if (m_directionQueue.size() > m_queueLimit)
+    {
+        m_directionQueue.pop_front();
+    }
 }
 
 float Puck::getRadius() const
@@ -45,9 +50,14 @@ Vector Puck::getDirection() const
     return m_direction;
 }
 
-std::queue<Vector>& Puck::getPositionQueue()
+std::deque<Vector> Puck::getPositionQueue()
 {
     return m_positionQueue;
+}
+
+std::deque<Vector> Puck::getDirectionQueue()
+{
+    return m_directionQueue;
 }
 
 Puck::~Puck()

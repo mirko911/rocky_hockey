@@ -1,6 +1,6 @@
 #pragma once
 
-#include <queue>
+#include <deque>
 #include <iostream>
 
 #include <Eigen/Dense>
@@ -13,8 +13,10 @@ private:
     Vector m_position;
     Vector m_direction;
     float m_radius;
-    float m_queueLimit = 10;
-    std::queue<Vector> m_positionQueue;
+    float m_queueLimit = 5;
+    std::deque<Vector> m_positionQueue;
+    std::deque<Vector> m_directionQueue;
+
 public:
     Puck(const float radius);
     Puck();
@@ -26,7 +28,8 @@ public:
     float getRadius() const;
     Vector getPosition() const;
     Vector getDirection() const;
-    std::queue<Vector>& getPositionQueue();
+    std::deque<Vector> getPositionQueue();
+    std::deque<Vector> getDirectionQueue();
 
     ~Puck();
 };

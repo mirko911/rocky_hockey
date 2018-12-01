@@ -26,7 +26,11 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 
     //https://dsp.stackexchange.com/questions/22648/in-opecv-function-hough-circles-how-does-parameter-1-and-2-affect-circle-detecti
     /// Apply the Hough Transform to find the circles
-    cv::HoughCircles(src, circles, cv::HOUGH_GRADIENT, 1.0, src.rows/8, 186, 12, 6, 10);
+    cv::HoughCircles(src, circles, cv::HOUGH_GRADIENT, 1.3f, src.rows/8, 186, 13, 7, 9);
+
+    if (circles.size() == 0) {
+        //std::cerr << "Nothing found" << std::endl;
+    }
 
     /// Draw the circles detected
     for (size_t i = 0; i < circles.size(); i++)
@@ -34,7 +38,7 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
         cv::Point center(circles[i][0], circles[i][1]);
         int radius = circles[i][2];
 
-        std::cout << center << " " << radius << std::endl;
+       // std::cout << center << " " << radius << std::endl;
 
         // circle center
         //circle(dst, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
@@ -42,16 +46,24 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
         circle(dst, center, radius, cv::Scalar(0, 0, 255), 1, 8, 0);
 
         Vector oldPosition = puck.getPosition();
-        Vector position(center.x, center.y);
+        Vector position(static_cast<float>(center.x), static_cast<float>(center.y));
+        Vector position_blend = (position + oldPosition) * 0.5f;
+        puck.setPosition(position_blend);
 
-        puck.setPosition(position);
+        Vector newDirection(0,0);
+        Vector direction = Vector((puck.getPosition() - oldPosition));
+        std::deque<Vector> directionQueue = puck.getDirectionQueue();
+        directionQueue.push_back(direction);
+        for (int i = 0; i < directionQueue.size(); i++) {
+            newDirection += directionQueue[i];
+        }
+        newDirection /= directionQueue.size();
 
-        Vector newDirection = Vector((position - oldPosition));
+        //std::cout << "[" << newDirection.x() << "," << newDirection.y() << "]" << std::endl;
 
-        Vector directionBlend = (newDirection + puck.getDirection() + puck.getDirection()) * 0.333f;
-        std::cout << "Squared diff " << (puck.getDirection() - directionBlend).squaredNorm() << std::endl;
+        //std::cout << "Squared diff " << (puck.getDirection() - directionBlend).squaredNorm() << std::endl;
         
-        puck.setDirection(directionBlend);
+        puck.setDirection(newDirection);
 
 
 #ifdef _DEBUG

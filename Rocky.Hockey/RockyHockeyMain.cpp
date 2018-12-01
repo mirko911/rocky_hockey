@@ -105,6 +105,18 @@ void RockyHockeyMain::worker_thread()
     cv::Mat workingImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat hsvImage = m_imgSrc.clone();
     cv::Mat rgbImage = m_imgSrc.clone();
+
+    cv::Mat intrinsic;
+    cv::Mat distCoeffs; 
+
+    //DistCoeffs
+    //-1.2745977774417608e-01 2.5673480915119734e-01
+    //6.2181312531178434e-05 2.4478544954494273e-03
+    //    - 1.7442435168323636e-01
+    
+    //Intrinsic
+    // 5.4840665967621987e+02 0. 320. 0. 5.4840665967621987e+02 240. 0. 0.
+    //1.
     while (!m_exit)
     {
         before = std::chrono::steady_clock::now();
@@ -115,6 +127,9 @@ void RockyHockeyMain::worker_thread()
             std::cerr << "[RockyHockeyWorker] image is empty" << std::endl;
             continue;
         }
+
+        //undistort(m_imgSrc, workingImage, intrinsic, distCoeffs);
+
 
         m_imgDst = m_imgSrc.clone();
 
@@ -165,6 +180,8 @@ void RockyHockeyMain::onKeyPress(const int key)
     case '27':
         m_exit = true;
         break;
+    case 's':
+        cv::imwrite("test_image.png", m_imgSrc);
     default:
         break;
     }
