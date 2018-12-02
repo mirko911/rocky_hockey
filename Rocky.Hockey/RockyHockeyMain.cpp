@@ -102,6 +102,8 @@ void RockyHockeyMain::worker_thread()
     if (config.targetFPS > 0)
         target_delta /= static_cast<float>(config.targetFPS);
 
+    std::string infoText = "";
+
     cv::Mat workingImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat undistImage;
     cv::Mat grayImage;
@@ -122,39 +124,40 @@ void RockyHockeyMain::worker_thread()
 
         cv::cvtColor(m_imgSrc, grayImage, cv::COLOR_BGR2GRAY);
 
-
+        infoText = "";
         if (m_undist) {
             imageTransform.undistort(grayImage, undistImage);
+            infoText = "Undistored ";
         }
         else {
             undistImage = grayImage.clone();
+            infoText = "Distored ";
         }
 
         if (m_wrap) {
             imageTransform.warpPerspective(undistImage, wrapImage);
+            infoText += " Wrapped";
         }
         else {
             wrapImage = undistImage.clone();
+            infoText += " Unwrapped";
         }
 
+        {
+            std::mutex m;
+            std::lock_guard<std::mutex> lockGuard(m);
+            m_imgDst = wrapImage.clone();
+        }
 
-        m_imgDst = wrapImage.clone();
+        cv::putText(m_imgDst, infoText, cv::Point2f(10, 10), cv::FONT_HERSHEY_PLAIN, 0.4, cv::Scalar(255, 255, 255, 255));
+
 
         workingImage = wrapImage;
-        //cv::inRange(hsvImage, cv::Scalar(0, 100, 150), cv::Scalar(179, 255, 255), hsvImage);
-        //hsvImage.copyTo(workingImage);
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
         m_tracker.Tick(workingImage, m_imgDst, m_puck);
 
-       // cv::adaptiveThreshold(workingImage, workingImage, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 71, 18);
-
-        {
-            std::mutex m;
-            std::lock_guard<std::mutex> lockGuard(m);
-            //workingImage.copyTo(m_imgDst);
-        }
 
         /*
         ==================================================
