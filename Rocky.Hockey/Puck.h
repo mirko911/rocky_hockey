@@ -13,7 +13,7 @@ private:
     Vector m_position;
     Vector m_direction;
     float m_radius;
-    float m_queueLimit = 5;
+    float m_queueLimit = 10;
     std::deque<Vector> m_positionQueue;
     std::deque<Vector> m_directionQueue;
 

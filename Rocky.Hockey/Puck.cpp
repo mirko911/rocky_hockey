@@ -3,11 +3,15 @@
 Puck::Puck(const float radius) : m_position(-1,-1), m_direction(0,0), m_radius(radius)
 {
     std::cout << "[Puck] spawned puck at position (-1,-1) with radius " << m_radius << std::endl;
+    m_positionQueue.push_back(m_position);
+    m_directionQueue.push_back(m_direction);
 }
 
 Puck::Puck() :  m_position(-1, -1), m_direction(0, 0), m_radius(10)
 {
     std::cout << "[Puck] spawned default puck at position (-1,-1) with radius " << m_radius << std::endl;
+    m_positionQueue.push_back(m_position);
+    m_directionQueue.push_back(m_direction);
 }
 
 void Puck::setRadius(const float radius)
