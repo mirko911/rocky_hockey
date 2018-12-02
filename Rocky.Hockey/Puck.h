@@ -10,12 +10,13 @@
 class Puck
 {
 private:
+	std::deque<Vector> m_positionQueue;
+	std::deque<Vector> m_directionQueue;
     Vector m_position;
     Vector m_direction;
     float m_radius;
     float m_queueLimit = 10;
-    std::deque<Vector> m_positionQueue;
-    std::deque<Vector> m_directionQueue;
+	unsigned int m_smoothingStepSize = 20; //create a trackbar for this?
 
 public:
     Puck(const float radius);
@@ -23,7 +24,6 @@ public:
 
     void setRadius(const float radius);
     void setPosition(const Vector &position);
-    void setDirection(const Vector &direction);
 
     float getRadius() const;
     Vector getPosition() const;

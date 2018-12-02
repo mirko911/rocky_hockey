@@ -27,16 +27,39 @@ void Puck::setPosition(const Vector & position)
     {
         m_positionQueue.pop_front();
     }
-}
 
-void Puck::setDirection(const Vector & direction)
-{
-    m_direction = direction.normalized();
-    m_directionQueue.push_back(m_direction);
-    if (m_directionQueue.size() > m_queueLimit)
-    {
-        m_directionQueue.pop_front();
-    }
+	//TODO: check if direction changed to the other side wall, this would make the current direction calculation wrong
+	//the position buffer and direction buffer would have to be wiped in that case
+	if (m_positionQueue.size() > m_smoothingStepSize)
+	{
+		m_direction = (position - m_positionQueue[m_smoothingStepSize]).normalized();
+
+		//add to direction buffer
+		m_directionQueue.push_back(m_direction);
+		if (m_directionQueue.size() > m_queueLimit)
+		{
+			m_directionQueue.pop_front();
+		}
+
+		//this does not seem to make to much of a difference, the blend might have to be weighted differently 
+		/*
+		//blend current direction with previous directions, all of these are normalized, current direction is counted doubly
+		for (const auto &oldDirection : m_directionQueue) {
+			m_direction += oldDirection;
+		}
+		m_direction /= m_directionQueue.size();
+		*/
+	}
+	else
+	{
+		m_direction = (position - m_positionQueue[1]).normalized();
+
+		m_directionQueue.push_back(m_direction);
+		if (m_directionQueue.size() > m_queueLimit)
+		{
+			m_directionQueue.pop_front();
+		}
+	}
 }
 
 float Puck::getRadius() const

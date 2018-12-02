@@ -19,7 +19,7 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     }
 
     if (circles.size() > 1) {
-        //std::cerr << "[Tracker] Found more then 1 circle" << std::endl;
+        //std::cerr << "[Tracker] Found more than one circle" << std::endl;
         return;
     }
 
@@ -30,6 +30,7 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     Vector position(circle[0], circle[1]);
     int radius = circle[2];
 
+	/*
     //Blend old and new position to smooth the jitter
     Vector oldPosition = puck.getPosition();
     Vector position_blend = (position + oldPosition) * 0.5f;
@@ -43,12 +44,11 @@ void Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
         oldDirectionMean += oldDirection;
     }
     oldDirectionMean /= directionQueue.size();
-    //std::cout << "[" << oldDirectionMean.x() << "," << oldDirectionMean.y() << "]" << std::endl;
-    Vector direction_blend = (oldDirectionMean + oldDirectionMean + oldDirectionMean + direction) * 0.25f;
+	*/
 
-    //Pass new vectors to puck class
-    puck.setPosition(position_blend);
-    puck.setDirection(direction_blend);
+    //this call now does the work of the code above
+    puck.setPosition(position);
+
 
 #ifdef _DEBUG
     //Draw a circle and an arrow to visualize the puck position and the direction
