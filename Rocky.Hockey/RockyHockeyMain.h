@@ -12,6 +12,7 @@
 #include "definitions.h"
 #include "Puck.h"
 #include "Tracker.h"
+#include "ImageTransformation.h"
 
 class RockyHockeyMain 
     : public std::enable_shared_from_this<RockyHockeyMain>
@@ -25,6 +26,9 @@ private:
 
     Puck m_puck;
     Tracker m_tracker;
+
+    bool m_undist = false;
+    bool m_wrap = false;
 
 public:
     bool m_exit = false;

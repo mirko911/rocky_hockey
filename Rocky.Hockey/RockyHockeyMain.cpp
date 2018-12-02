@@ -103,20 +103,12 @@ void RockyHockeyMain::worker_thread()
         target_delta /= static_cast<float>(config.targetFPS);
 
     cv::Mat workingImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
-    cv::Mat hsvImage = m_imgSrc.clone();
-    cv::Mat rgbImage = m_imgSrc.clone();
+    cv::Mat undistImage;
+    cv::Mat grayImage;
+    cv::Mat wrapImage;
 
-    cv::Mat intrinsic;
-    cv::Mat distCoeffs; 
+    ImageTransformation imageTransform;
 
-    //DistCoeffs
-    //-1.2745977774417608e-01 2.5673480915119734e-01
-    //6.2181312531178434e-05 2.4478544954494273e-03
-    //    - 1.7442435168323636e-01
-    
-    //Intrinsic
-    // 5.4840665967621987e+02 0. 320. 0. 5.4840665967621987e+02 240. 0. 0.
-    //1.
     while (!m_exit)
     {
         before = std::chrono::steady_clock::now();
@@ -128,13 +120,27 @@ void RockyHockeyMain::worker_thread()
             continue;
         }
 
-        //undistort(m_imgSrc, workingImage, intrinsic, distCoeffs);
+        cv::cvtColor(m_imgSrc, grayImage, cv::COLOR_BGR2GRAY);
 
 
-        m_imgDst = m_imgSrc.clone();
+        if (m_undist) {
+            imageTransform.undistort(grayImage, undistImage);
+        }
+        else {
+            undistImage = grayImage.clone();
+        }
+
+        if (m_wrap) {
+            imageTransform.warpPerspective(undistImage, wrapImage);
+        }
+        else {
+            wrapImage = undistImage.clone();
+        }
 
 
-        cv::cvtColor(m_imgSrc, workingImage, cv::COLOR_BGR2GRAY);
+        m_imgDst = wrapImage.clone();
+
+        workingImage = wrapImage;
         //cv::inRange(hsvImage, cv::Scalar(0, 100, 150), cv::Scalar(179, 255, 255), hsvImage);
         //hsvImage.copyTo(workingImage);
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
@@ -182,6 +188,13 @@ void RockyHockeyMain::onKeyPress(const int key)
         break;
     case 's':
         cv::imwrite("test_image.png", m_imgSrc);
+        break;
+    case 'u':
+        m_undist = !m_undist;
+        break;
+    case 'w':
+        m_wrap = !m_wrap;
+        break;
     default:
         break;
     }

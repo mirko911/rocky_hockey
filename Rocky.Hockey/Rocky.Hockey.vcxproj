@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImageTransformation.cpp" />
     <ClCompile Include="Prediction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Puck.cpp" />
@@ -136,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="definitions.h" />
+    <ClInclude Include="ImageTransformation.h" />
     <ClInclude Include="Prediction.h" />
     <ClInclude Include="Puck.h" />
     <ClInclude Include="RockyHockeyMain.h" />
