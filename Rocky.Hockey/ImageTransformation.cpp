@@ -66,6 +66,11 @@ void ImageTransformation::warpPerspective(cv::Mat & src, cv::Mat & dst)
     cv::warpPerspective(src, dst, m_M, cv::Size(m_maxWidth, m_maxHeight), cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 }
 
+cv::Size ImageTransformation::getFieldSize()
+{
+    return cv::Size(m_maxWidth, m_maxHeight);
+}
+
 ImageTransformation::ImageTransformation()
 {
     std::cout << "[ImageTransform] construct" << std::endl;

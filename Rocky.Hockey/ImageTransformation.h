@@ -31,6 +31,7 @@ private:
 public:
     void undistort(cv::Mat &src, cv::Mat &dst);
     void warpPerspective(cv::Mat &src, cv::Mat &dst);
+    cv::Size getFieldSize();
     ImageTransformation();
     ~ImageTransformation();
 };

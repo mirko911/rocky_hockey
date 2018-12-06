@@ -8,9 +8,11 @@
 
 class Tracker
 {
+private:
+    int m_wrongDetections = 0;
 public:
     Tracker();
-    void Tick(const cv::Mat &src, cv::Mat &dst, Puck& puck);
+    bool Tick(const cv::Mat &src, cv::Mat &dst, Puck& puck);
     ~Tracker();
 };
 

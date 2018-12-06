@@ -14,6 +14,7 @@
 #include "Puck.h"
 #include "Tracker.h"
 #include "ImageTransformation.h"
+#include "Prediction.h"
 
 class RockyHockeyMain 
     : public std::enable_shared_from_this<RockyHockeyMain>

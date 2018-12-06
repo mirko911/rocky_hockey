@@ -105,11 +105,13 @@ void RockyHockeyMain::worker_thread()
     std::string infoText = "";
 
     cv::Mat workingImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
-    cv::Mat undistImage;
-    cv::Mat grayImage;
-    cv::Mat wrapImage;
-
+    cv::Mat undistImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
+    cv::Mat grayImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
+    cv::Mat wrapImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
+    m_imgDst = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
     ImageTransformation imageTransform;
+    Prediction prediction;
+    prediction.setFieldSize(imageTransform.getFieldSize());
 
     while (!m_exit)
     {
@@ -146,7 +148,7 @@ void RockyHockeyMain::worker_thread()
         {
             std::mutex m;
             std::lock_guard<std::mutex> lockGuard(m);
-            m_imgDst = wrapImage.clone();
+            m_imgDst = cv::Mat::zeros(wrapImage.size(), CV_8UC3);
         }
 
         cv::putText(m_imgDst, infoText, cv::Point2f(10, 10), cv::FONT_HERSHEY_PLAIN, 0.4, cv::Scalar(255, 255, 255, 255));
@@ -157,7 +159,7 @@ void RockyHockeyMain::worker_thread()
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
         m_tracker.Tick(workingImage, m_imgDst, m_puck);
-
+        prediction.tick(m_imgDst, m_puck);
 
         /*
         ==================================================

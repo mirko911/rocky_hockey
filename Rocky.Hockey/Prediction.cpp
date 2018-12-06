@@ -4,27 +4,138 @@
 
 Prediction::Prediction()
 {
+    //We can skip the right wall, because it's the user side wall.
+    //We don't need to predict the movement in this direction
     m_walls = {
         Wall{
-            Eigen::Vector2f(0, 0),
-            Eigen::Vector2f(0, config.fieldWidth),
-            Eigen::Vector2f(0, -1),
+            Line::Through(Vector(0,0), Vector(config.fieldWidth,0)), //TOP Wall
+            Vector(0,0),
+            Vector(config.fieldWidth,0),
+            Vector(0, -1),
         },
         Wall{
-            Eigen::Vector2f(0, 0),
-            Eigen::Vector2f(0, config.fieldWidth),
-            Eigen::Vector2f(0, -1),
+            Line::Through(Vector(0, config.fieldHeight), Vector(config.fieldWidth, config.fieldHeight)), //BOTTOM Wall
+            Vector(0, config.fieldHeight),
+            Vector(config.fieldWidth, config.fieldHeight),
+            Vector(0, 1),
         },
-        Wall{
-            Eigen::Vector2f(0, 0),
-            Eigen::Vector2f(0, config.fieldWidth),
-            Eigen::Vector2f(0, -1),
-        },
-        Wall{
-            Eigen::Vector2f(0, 0),
-            Eigen::Vector2f(0, config.fieldWidth),
-            Eigen::Vector2f(0, -1),
+       // Wall{ //not sure if we need the third wall, because we should get an intersection with the defend
+       // Line before we hit the wall
+      //      Line::Through(Vector(0,0), Vector(0, config.fieldHeight)), //LEFT Wall
+      //      Vector(1, 0),
+       // },
+    };
+
+    //Defind line with random magic numbers 
+    //@todo find a better way
+    m_defendLine = {
+        Line::Through(Vector(20, 0), Vector(20, config.fieldHeight)),
+        Vector(20, 0),
+        Vector(20, config.fieldHeight),
+        Vector(1,0)
+    };
+}
+
+void Prediction::tick(cv::Mat &dst, Puck & puck)
+{
+    //Check backward movement
+    Vector directionMean = puck.getDirection();
+    //std::cout << "DirMean [" << directionMean.x() << "," << directionMean.y() << "]" << std::endl;
+    
+    if (directionMean.x() > 0 || directionMean.hasNaN()) {
+        //std::cout << "[Prediction] Puck is moving backwards. Clear the history" << std::endl;
+        //puck.resetPosition();
+        puck.resetDirection();
+        puck.resetVelocity();
+        m_predictedPosition = Vector();
+        m_predictionQueue.clear();
+        return;
+    }
+
+    Vector intersection;
+    
+    //Let's do 3 bounces.
+    //Stop when we hit the defendLine or after 3 bounces
+    int i = 0;
+    bool foundIntersection = false;
+    while(i < 3 && !foundIntersection){
+        //Redefine Vars
+        Vector direction = puck.getDirection();
+        Vector position = puck.getPosition();
+        Vector trajectory = position + (direction * 1000);
+
+       // std::cout << "Loop" << std::endl;
+
+        //Check Wall Intersections
+        for (const Wall &wall : m_walls) {
+            Line trajectoryLine = Line::Through(position, trajectory);
+            cv::line(dst, Vector2Point(position), Vector2Point(trajectory), cv::Scalar(0, 0, 255, 100), 1);
+
+            //Check if we would hit the line without a wall intersection
+            //We've to check this here, because the 'direct' intersection
+            //could happen after a wall reflection
+            auto defendIntersection = m_defendLine.line.intersection(trajectoryLine);
+            intersection = Vector(defendIntersection.x(), defendIntersection.y());
+            if (!defendIntersection.hasNaN() && intersection.x() < position.x() && isInsideWall(m_defendLine, intersection)) {
+                std::cout << "Found direction intersection" << printVector(intersection) << " " << printVector(position) << " " << printVector(direction) << std::endl;
+                m_predictionQueue.push_back(intersection);
+                foundIntersection = true;
+                break;
+            }
+
+            //Check intersection beween puck and wall.
+            //Also check if the intersection has the correct direction
+            auto wallIntersection = wall.line.intersection(trajectoryLine);
+            intersection = Vector(wallIntersection.x(), wallIntersection.y());
+            if (intersection.hasNaN() && intersection.x() > position.x() && isInsideWall(wall, intersection)) {
+                std::cout << "Wrong intersection" << std::endl;
+                continue;
+            }
+
+            //r=d-2(d dot n)n
+            //where d dot n is the dot product, and n must be normalized
+            Vector reflection = direction - 2 * (direction.dot(wall.normal))*wall.normal;
+
+            //Redefine Vars
+            direction = reflection;
+            position = intersection;
+            trajectory = position + (direction * 100);
+
+            //Draw the intersection point
+            cv::circle(dst, Vector2Point(intersection), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
         }
+        i++;
+    }
+    m_predictedPosition = getMean(m_predictionQueue);
+    cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
+
+    for (const Wall &wall : m_walls) {
+        cv::line(dst, Vector2Point(wall.start), Vector2Point(wall.end), cv::Scalar(0, 255, 0), 1, 8);
+    }
+    cv::line(dst, Vector2Point(m_defendLine.start), Vector2Point(m_defendLine.end), cv::Scalar(0, 255, 255), 1, 8);
+
+}
+
+void Prediction::setFieldSize(const cv::Size & size)
+{
+    m_walls = {
+           Wall{
+               Line::Through(Vector(0,0), Vector(size.width,0)), //TOP Wall
+               Vector(0,0),
+               Vector(size.width - 1,0),
+               Vector(0, -1),
+           },
+           Wall{
+               Line::Through(Vector(0, size.height - 1), Vector(size.width - 1, size.height - 1)), //BOTTOM Wall
+               Vector(0, size.height - 1),
+               Vector(size.width - 1, size.height - 1),
+               Vector(0, 1),
+           },
+           //not sure if we need the third wall, because we should get an intersection with the defend
+           // Wall{ 
+           //      Line::Through(Vector(0,0), Vector(0, config.fieldHeight)), //LEFT Wall
+           //      Vector(1, 0),
+           // },
     };
 }
 
