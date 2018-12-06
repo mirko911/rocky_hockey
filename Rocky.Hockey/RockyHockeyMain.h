@@ -29,8 +29,8 @@ private:
     Puck m_puck;
     Tracker m_tracker;
 
-    bool m_undist = false;
-    bool m_wrap = false;
+    bool m_undist = true;
+    bool m_wrap = true;
 
 public:
     bool m_exit = false;
