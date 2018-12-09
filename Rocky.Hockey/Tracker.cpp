@@ -17,9 +17,13 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 
     std::vector < cv::Vec3f > circles;
 
+
+
+
+
     //https://dsp.stackexchange.com/questions/22648/in-opecv-function-hough-circles-how-does-parameter-1-and-2-affect-circle-detecti
     /// Apply the Hough Transform to find the circles
-    cv::HoughCircles(src, circles, cv::HOUGH_GRADIENT, 1.3f, src.rows/8, 186, 13, 7, 9);
+    cv::HoughCircles(src, circles, cv::HOUGH_GRADIENT, static_cast<float>(dp/10.0f), src.rows/8, threshold1, threshold2, minArea, maxArea);
 
     if (circles.size() == 0) {
         //std::cerr << "[Tracker] Nothing found" << std::endl;
@@ -43,31 +47,28 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     Vector position(circle[0], circle[1]);
     int radius = circle[2];
 
-    //Blend old and new position to smooth the jitter
     Vector oldPosition = puck.getPosition();
-    Vector position_blend = position;
-    if (!oldPosition.hasNaN()) {
-        Vector position_blend = (position + oldPosition) * 0.5f;
+    if (oldPosition.hasNaN()) {
+        oldPosition = position;
+        puck.setPosition(position);
     }
 
     //Calculate mean of all old directions and blend them with a 2:1 ratio into a new direction
     Vector direction = Vector((position - oldPosition));
-    Vector oldDirectionMean = direction;
-
-    //Make sure the queue isn't empty
-    if (puck.getDirectionQueue().size() > 0) {
-        oldDirectionMean = getMean(puck.getDirectionQueue());
+    Vector oldDirection = puck.getDirection();
+    if (oldDirection.hasNaN()) {
+        oldDirection = direction;
     }
-     
-    //std::cout << "[" << oldDirectionMean.x() << "," << oldDirectionMean.y() << "]" << std::endl;
-    Vector direction_blend = (oldDirectionMean + oldDirectionMean + oldDirectionMean + direction) * 0.25f;
-   // std::cout << "[" << direction_blend.x() << "," << direction_blend.y() << "]" << std::endl;
-
+    Vector direction_blend = (direction + oldDirection) * 0.5f;
+    float distance = direction.norm();
 
     //Pass new vectors to puck class
-    puck.setPosition(position_blend);
-    puck.setDirection(direction_blend);
-    puck.setVelocity(direction_blend.norm());
+    if (distance >= 5.0f) {
+        puck.setPosition(position);
+        puck.setDirection(direction);
+    }
+    puck.setVelocity(distance);
+
 #ifdef _DEBUG
     //Draw a circle and an arrow to visualize the puck position and the direction
     cv::circle(dst, cv::Point(position.x(), position.y()), radius, cv::Scalar(0, 0, 255), 1, 8, 0);

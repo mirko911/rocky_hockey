@@ -47,7 +47,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         //puck.resetPosition();
         puck.resetDirection();
         puck.resetVelocity();
-        m_predictedPosition = Vector();
+        m_predictedPosition = Vector(NAN, NAN);
         m_predictionQueue.clear();
         return;
     }
@@ -69,7 +69,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         //Check Wall Intersections
         for (const Wall &wall : m_walls) {
             Line trajectoryLine = Line::Through(position, trajectory);
-            cv::line(dst, Vector2Point(position), Vector2Point(trajectory), cv::Scalar(0, 0, 255, 100), 1);
+            cv::line(dst, Vector2Point(position), Vector2Point(trajectory), cv::Scalar(0, 0, 255), 1);
 
             //Check if we would hit the line without a wall intersection
             //We've to check this here, because the 'direct' intersection
@@ -103,6 +103,8 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
 
             //Draw the intersection point
             cv::circle(dst, Vector2Point(intersection), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
+            cv::line(dst, Vector2Point(wall.start), Vector2Point(wall.end), cv::Scalar(0, 255, 0), 1, 8);
+
         }
         i++;
     }
@@ -110,7 +112,6 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
     cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
 
     for (const Wall &wall : m_walls) {
-        cv::line(dst, Vector2Point(wall.start), Vector2Point(wall.end), cv::Scalar(0, 255, 0), 1, 8);
     }
     cv::line(dst, Vector2Point(m_defendLine.start), Vector2Point(m_defendLine.end), cv::Scalar(0, 255, 255), 1, 8);
 
@@ -118,17 +119,24 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
 
 void Prediction::setFieldSize(const cv::Size & size)
 {
+    //Adjust the wall positions, because we use the center of the circle for the
+    //calculation. Therefore we need to subtract 0.5Radius from the wall.
+    //Subtract -1, because we start with zero and not with 1
+    int width = size.width - config.puckRadius - 1;
+    int height = size.height - config.puckRadius -1;
+    int zero = 0 + static_cast<int>(config.puckRadius * 0.5f);
+
     m_walls = {
            Wall{
-               Line::Through(Vector(0,0), Vector(size.width,0)), //TOP Wall
-               Vector(0,0),
-               Vector(size.width - 1,0),
+               Line::Through(Vector(zero,zero), Vector(width,0)), //TOP Wall
+               Vector(zero,zero),
+               Vector(width,zero),
                Vector(0, -1),
            },
            Wall{
-               Line::Through(Vector(0, size.height - 1), Vector(size.width - 1, size.height - 1)), //BOTTOM Wall
-               Vector(0, size.height - 1),
-               Vector(size.width - 1, size.height - 1),
+               Line::Through(Vector(zero, height), Vector(width, height)), //BOTTOM Wall
+               Vector(zero, height),
+               Vector(width, height),
                Vector(0, 1),
            },
            //not sure if we need the third wall, because we should get an intersection with the defend

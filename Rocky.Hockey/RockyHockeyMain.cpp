@@ -49,6 +49,11 @@ void RockyHockeyMain::Run()
 
     cv::createTrackbar("Canny Low", "display", &cannyLow, cannyMax);
     cv::createTrackbar("Canny High", "display", &cannyHigh, cannyMax);
+    cv::createTrackbar("DP", "display", &m_tracker.dp, m_tracker.dpLimit);
+    cv::createTrackbar("thres1", "display", &m_tracker.threshold1, m_tracker.thresholdLimit);
+    cv::createTrackbar("thres2", "display", &m_tracker.threshold2, m_tracker.thresholdLimit);
+    cv::createTrackbar("minArea", "display", &m_tracker.minArea, m_tracker.areaLimit);
+    cv::createTrackbar("maxArea", "display", &m_tracker.maxArea, m_tracker.areaLimit);
 
     int key = -1;
     while (!m_exit)
@@ -108,6 +113,7 @@ void RockyHockeyMain::worker_thread()
     cv::Mat undistImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat grayImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat wrapImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
+    cv::Mat debugImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
     m_imgDst = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
     ImageTransformation imageTransform;
     Prediction prediction;
@@ -117,7 +123,10 @@ void RockyHockeyMain::worker_thread()
     {
         before = std::chrono::steady_clock::now();
 
-        m_captureDevice >> m_imgSrc;
+        if (!m_stop) {
+            m_captureDevice >> m_imgSrc;
+            m_frameCounter++;
+        }
 
         if (m_imgSrc.empty()) {
             std::cerr << "[RockyHockeyWorker] image is empty" << std::endl;
@@ -145,21 +154,27 @@ void RockyHockeyMain::worker_thread()
             infoText += " Unwrapped";
         }
 
-        {
-            std::mutex m;
-            std::lock_guard<std::mutex> lockGuard(m);
-            m_imgDst = cv::Mat::zeros(wrapImage.size(), CV_8UC3);
-        }
+        wrapImage.copyTo(debugImage);
+        cvtColor(debugImage, debugImage, cv::COLOR_GRAY2BGR);
 
-        cv::putText(m_imgDst, infoText, cv::Point2f(10, 10), cv::FONT_HERSHEY_PLAIN, 0.4, cv::Scalar(255, 255, 255, 255));
+
+        cv::putText(debugImage, infoText, cv::Point2f(10, 10), cv::FONT_HERSHEY_PLAIN, 0.4, cv::Scalar(255, 255, 255, 255));
 
 
         workingImage = wrapImage;
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
-        m_tracker.Tick(workingImage, m_imgDst, m_puck);
-        prediction.tick(m_imgDst, m_puck);
+       // if(m_frameCounter % 4 == 0) {
+            m_tracker.Tick(workingImage, debugImage, m_puck);
+       // }
+        prediction.tick(debugImage, m_puck);
+
+        {
+            std::mutex m;
+            std::lock_guard<std::mutex> lockGuard(m);
+            m_imgDst = debugImage.clone(); //cv::Mat::zeros(wrapImage.size(), CV_8UC3);
+        }
 
         /*
         ==================================================
@@ -200,6 +215,8 @@ void RockyHockeyMain::onKeyPress(const int key)
     case 'w':
         m_wrap = !m_wrap;
         break;
+    case 'p':
+        m_stop = !m_stop;
     default:
         break;
     }

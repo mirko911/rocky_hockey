@@ -14,6 +14,7 @@ static constexpr struct Config {
     int fieldWidth = 1000;
     int fieldHeight = 1000;
     int wrongDetectionThreshold = 10;
+    int puckRadius = 10;
 } config;
 
 struct Wall {

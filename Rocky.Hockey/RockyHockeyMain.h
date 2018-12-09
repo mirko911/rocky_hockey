@@ -31,7 +31,8 @@ private:
 
     bool m_undist = true;
     bool m_wrap = true;
-
+    bool m_stop = false;
+    int m_frameCounter = 0;
 public:
     bool m_exit = false;
     int cannyLow = 176;
