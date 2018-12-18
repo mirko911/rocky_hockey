@@ -8,7 +8,7 @@ Tracker::Tracker()
 bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 {
     if (m_wrongDetections >= config.wrongDetectionThreshold) {
-        std::cerr << "[Tracker] Puck wasn't found for " + std::to_string(m_wrongDetections) + "frames. Reset puck status" << std::endl;
+        //std::cerr << "[Tracker] Puck wasn't found for " + std::to_string(m_wrongDetections) + "frames. Reset puck status" << std::endl;
         puck.resetDirection();
         puck.resetPosition();
         puck.resetVelocity();
@@ -17,7 +17,9 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 
     std::vector < cv::Vec3f > circles;
 
-
+    for (const auto &circle : circles) {
+        cv::circle(dst, cv::Point(circle[0], circle[1]), circle[2], cv::Scalar(0, 0, 255), 1, 8, 0);
+    }
 
 
 
@@ -34,7 +36,7 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     if (circles.size() > 1) {
         //std::cerr << "[Tracker] Found more then 1 puck" << std::endl;
         m_wrongDetections++;
-        return false;
+     //   return false;
     }
 
     //Reset the wrong detection status
@@ -73,6 +75,11 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     //Draw a circle and an arrow to visualize the puck position and the direction
     cv::circle(dst, cv::Point(position.x(), position.y()), radius, cv::Scalar(0, 0, 255), 1, 8, 0);
     
+    if (puck.getDirection().hasNaN()) {
+        //don't draw arrow if the direction vector is NaN
+        return true;
+    }
+
     Vector arrowPos = position + (puck.getDirection() * 100);
     cv::arrowedLine(
         dst,

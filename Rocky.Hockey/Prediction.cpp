@@ -53,10 +53,12 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
     }
 
     Vector intersection;
-    
+    std::cout << std::endl;
+
     //Let's do 3 bounces.
     //Stop when we hit the defendLine or after 3 bounces
     int i = 0;
+    int j = 0;
     bool foundIntersection = false;
     while(i < 3 && !foundIntersection){
         //Redefine Vars
@@ -65,32 +67,47 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         Vector trajectory = position + (direction * 1000);
 
        // std::cout << "Loop" << std::endl;
-
+        j = 0;
+        bool directIntersection = true; //used for debug output. I just want to check if we can correctly detect a direct hit
         //Check Wall Intersections
         for (const Wall &wall : m_walls) {
+            j++;
+
             Line trajectoryLine = Line::Through(position, trajectory);
             cv::line(dst, Vector2Point(position), Vector2Point(trajectory), cv::Scalar(0, 0, 255), 1);
 
             //Check if we would hit the line without a wall intersection
             //We've to check this here, because the 'direct' intersection
-            //could happen after a wall reflection
+            //could also happen after a wall reflection
             auto defendIntersection = m_defendLine.line.intersection(trajectoryLine);
             intersection = Vector(defendIntersection.x(), defendIntersection.y());
             if (!defendIntersection.hasNaN() && intersection.x() < position.x() && isInsideWall(m_defendLine, intersection)) {
-                std::cout << "Found direction intersection" << printVector(intersection) << " " << printVector(position) << " " << printVector(direction) << std::endl;
+                if (directIntersection) {
+                    std::cout << "Found direct direction intersection" << printVector(intersection) << " " << printVector(position) << " " << printVector(direction) << " WallID" << j << std::endl;
+                }
+                else {
+                    std::cout << "Found intersection" << printVector(intersection) << " " << printVector(position) << " " << printVector(direction) << " WallID" << j << std::endl;
+                }
                 m_predictionQueue.push_back(intersection);
                 foundIntersection = true;
                 break;
             }
 
+            cv::line(dst, Vector2Point(wall.start), Vector2Point(wall.end), cv::Scalar(0, 255, 0), 1, 8);
+            //Draw the intersection point
+            cv::circle(dst, Vector2Point(intersection), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
+            directIntersection = false;
+
             //Check intersection beween puck and wall.
             //Also check if the intersection has the correct direction
             auto wallIntersection = wall.line.intersection(trajectoryLine);
             intersection = Vector(wallIntersection.x(), wallIntersection.y());
-            if (intersection.hasNaN() && intersection.x() > position.x() && isInsideWall(wall, intersection)) {
+            if (intersection.hasNaN() || intersection.x() > position.x() || !isInsideWall(wall, intersection)) {
                 std::cout << "Wrong intersection" << std::endl;
                 continue;
             }
+
+            std::cout << "Intersect on Wall " << j << std::endl;
 
             //r=d-2(d dot n)n
             //where d dot n is the dot product, and n must be normalized
@@ -100,11 +117,6 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
             direction = reflection;
             position = intersection;
             trajectory = position + (direction * 100);
-
-            //Draw the intersection point
-            cv::circle(dst, Vector2Point(intersection), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
-            cv::line(dst, Vector2Point(wall.start), Vector2Point(wall.end), cv::Scalar(0, 255, 0), 1, 8);
-
         }
         i++;
     }
@@ -144,6 +156,14 @@ void Prediction::setFieldSize(const cv::Size & size)
            //      Line::Through(Vector(0,0), Vector(0, config.fieldHeight)), //LEFT Wall
            //      Vector(1, 0),
            // },
+    };
+
+    //Defind line with random magic numbers 
+    m_defendLine = {
+        Line::Through(Vector(20, 0), Vector(20, size.height)),
+        Vector(20, 0),
+        Vector(20, size.height),
+        Vector(1,0)
     };
 }
 

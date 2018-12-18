@@ -10,11 +10,11 @@ typedef Eigen::Hyperplane<float, 2> Line;
 static constexpr struct Config {
     int camWidth = 480;
     int camHeight = 240;
-    int targetFPS = 60;
+    int targetFPS = 10;
     int fieldWidth = 1000;
     int fieldHeight = 1000;
     int wrongDetectionThreshold = 10;
-    int puckRadius = 10;
+    int puckRadius = 8;
 } config;
 
 struct Wall {

@@ -4,12 +4,11 @@
 
 std::vector<Vector> ImageTransformation::findCornerPoints()
 {
-    //@todo: find points with openCV
-    std::vector<Vector> points{
-        Vector(10,29),
-        Vector(268,17),
-        Vector(5,204),
-        Vector(310,163)
+    std::vector<Vector> points = {
+    {27,38}, //Top Left
+    {282,42},  //Top Right
+    {25, 193}, //Bottom Left
+    {279, 191} //Bottom right
     };
 
     std::cout << "[ImageTransform] foud corner points :" ;
