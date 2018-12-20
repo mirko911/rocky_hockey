@@ -1,7 +1,7 @@
 #include "RockyHockeyMain.h"
 
 int main() {
-    RockyHockeyMain rockyhockey("./../../demos/demo_1.mkv");
+    RockyHockeyMain rockyhockey("./../../demos/demo_4.mkv");
 
     rockyhockey.Init();
     rockyhockey.Run();

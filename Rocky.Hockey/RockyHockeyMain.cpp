@@ -1,5 +1,18 @@
 #include "RockyHockeyMain.h"
 
+void RockyHockeyMain::startBrodCastServer()
+{
+    m_server.init_asio();
+
+    m_server.set_open_handler(bind(&RockyHockeyMain::onOpen, this, ::_1));
+    m_server.set_close_handler(bind(&RockyHockeyMain::onClose, this, ::_1));
+    //m_server.set_message_handler(bind(&RockyHockeyMain::on_message, this, ::_1, ::_2));
+    m_server.listen(9002);
+    m_server.start_accept();
+    m_server.run();
+
+}
+
 RockyHockeyMain::RockyHockeyMain(const std::string path) : m_captureDevice(path)
 {
     std::cout << "[RockyHockeyMain] using a file as capture device" << std::endl;
@@ -37,6 +50,25 @@ void RockyHockeyMain::Init()
     m_imgSrc.copyTo(m_imgDst);
 
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
+
+    try {
+        //Set logging settings
+        m_echo_server.set_access_channels(websocketpp::log::alevel::all);
+        m_echo_server.clear_access_channels(websocketpp::log::alevel::frame_payload);
+
+        // Initialize Asio
+        m_echo_server.init_asio();
+        m_echo_server.listen(9002);
+        m_echo_server.start_accept();
+        m_echo_server.run();
+    }
+    catch (websocketpp::exception const & e) {
+        std::cout << e.what() << std::endl;
+    }
+    catch (...) {
+        std::cout << "other exception" << std::endl;
+    }
+
 }
 
 void RockyHockeyMain::Run()
@@ -119,8 +151,14 @@ void RockyHockeyMain::worker_thread()
     Prediction prediction;
     prediction.setFieldSize(imageTransform.getFieldSize());
 
+    message_ptr message;
+
     while (!m_exit)
     {
+        message->set_payload("TICK");
+        for (auto it : m_connections) {
+            m_server.send(it, message);
+        }
         before = std::chrono::steady_clock::now();
 
         if (!m_stop) {
@@ -220,6 +258,16 @@ void RockyHockeyMain::onKeyPress(const int key)
     default:
         break;
     }
+}
+
+void RockyHockeyMain::onOpen(connection_hdl hdl)
+{
+    m_connections.insert(hdl);
+}
+
+void RockyHockeyMain::onClose(connection_hdl hdl)
+{
+    m_connections.erase(hdl);
 }
 
 RockyHockeyMain::~RockyHockeyMain()

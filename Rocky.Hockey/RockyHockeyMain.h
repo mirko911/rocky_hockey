@@ -10,16 +10,30 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <websocketpp/server.hpp>
+#include <websocketpp/config/asio_no_tls.hpp>
+
 #include "definitions.h"
 #include "Puck.h"
 #include "Tracker.h"
 #include "ImageTransformation.h"
 #include "Prediction.h"
 
+typedef websocketpp::server<websocketpp::config::asio> server;
+using websocketpp::connection_hdl;
+using websocketpp::lib::placeholders::_1;
+using websocketpp::lib::placeholders::_2;
+using websocketpp::lib::bind;
+
+// pull out the type of messages sent by our config
+typedef server::message_ptr message_ptr;
+
 class RockyHockeyMain 
     : public std::enable_shared_from_this<RockyHockeyMain>
 {
 private:
+    typedef std::set<connection_hdl, std::owner_less<connection_hdl>> con_list;
+    con_list m_connections;
     cv::VideoCapture m_captureDevice;
     cv::Mat m_imgSrc;
     cv::Mat m_imgDst;
@@ -28,11 +42,14 @@ private:
 
     Puck m_puck;
     Tracker m_tracker;
+    server m_server;
 
     bool m_undist = true;
     bool m_wrap = true;
     bool m_stop = false;
     int m_frameCounter = 0;
+
+    void startBrodCastServer();
 public:
     bool m_exit = false;
     int cannyLow = 176;
@@ -48,6 +65,8 @@ public:
 
     void worker_thread();
     void onKeyPress(const int key);
+    void onOpen(connection_hdl hdl);
+    void onClose(connection_hdl hdl);
     ~RockyHockeyMain();
 };
 

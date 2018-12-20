@@ -1,3 +1,6 @@
 [submodule "Rocky.Hockey/ext/eigen3"]
 	path = Rocky.Hockey/ext/eigen3
 	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "Rocky.Hockey/ext/websocketpp"]
+	path = Rocky.Hockey/ext/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
