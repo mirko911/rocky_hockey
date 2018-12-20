@@ -39,6 +39,7 @@ private:
     cv::Mat m_imgDst;
     int m_FPS = 0;
     std::unique_ptr<std::thread> m_workerThread;
+    std::unique_ptr<std::thread> m_workerWebsocket;
 
     Puck m_puck;
     Tracker m_tracker;
@@ -64,6 +65,7 @@ public:
     void Fini();
 
     void worker_thread();
+    void worker_websocket();
     void onKeyPress(const int key);
     void onOpen(connection_hdl hdl);
     void onClose(connection_hdl hdl);

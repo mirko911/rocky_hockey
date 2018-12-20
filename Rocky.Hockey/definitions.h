@@ -7,6 +7,8 @@
 typedef Eigen::Vector2f Vector;
 typedef Eigen::Hyperplane<float, 2> Line;
 
+
+
 static constexpr struct Config {
     int camWidth = 480;
     int camHeight = 240;
