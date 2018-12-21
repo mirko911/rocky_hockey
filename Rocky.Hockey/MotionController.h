@@ -16,6 +16,8 @@ class MotionController
 {
 private:
     SerialConnection m_serial;
+    float m_ratioX;
+    float m_ratioY;
 public:
     MotionController(const std::string tty_name, const int baudRate);
     void moveToPosition(const Vector position);

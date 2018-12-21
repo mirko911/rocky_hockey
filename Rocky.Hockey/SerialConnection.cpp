@@ -62,6 +62,12 @@ void SerialConnection::send(const uint8_t text)
     boost::asio::write(m_port, boost::asio::buffer(&text, 1));
 }
 
+void SerialConnection::send(const int16_t text)
+{
+    boost::asio::write(m_port, boost::asio::buffer(&text, 1));
+}
+
+
 void SerialConnection::onData(const boost::system::error_code & e, const std::size_t size)
 {
     if (!e)

@@ -26,6 +26,7 @@ public:
     void startReceive();
     void send(const std::string& text);
     void send(const uint8_t text);
+    void send(const int16_t text);
     void onData(const boost::system::error_code& e, const std::size_t size);
     bool quit();
 };

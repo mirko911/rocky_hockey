@@ -84,13 +84,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;ext\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opencv_calib3d400d.lib;opencv_core400d.lib;opencv_features2d400d.lib;opencv_flann400d.lib;opencv_highgui400d.lib;opencv_imgcodecs400d.lib;opencv_imgproc400d.lib;opencv_ml400d.lib;opencv_objdetect400d.lib;opencv_photo400d.lib;opencv_shape400d.lib;opencv_stitching400d.lib;opencv_superres400d.lib;opencv_video400d.lib;opencv_videoio400d.lib;opencv_videostab400d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%OPENCV_DIR%\x64\vc15\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_calib3d400d.lib;opencv_core400d.lib;opencv_features2d400d.lib;opencv_flann400d.lib;opencv_highgui400d.lib;opencv_imgcodecs400d.lib;opencv_imgproc400d.lib;opencv_ml400d.lib;opencv_objdetect400d.lib;opencv_photo400d.lib;opencv_shape400d.lib;opencv_stitching400d.lib;opencv_superres400d.lib;opencv_video400d.lib;opencv_videoio400d.lib;opencv_videostab400d.lib;libboost_system-vc141-mt-gd-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%OPENCV_DIR%\x64\vc15\lib;ext\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,32 +116,37 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;ext\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>opencv_calib3d400.lib;opencv_core400.lib;opencv_features2d400.lib;opencv_flann400.lib;opencv_highgui400.lib;opencv_imgcodecs400.lib;opencv_imgproc400.lib;opencv_ml400.lib;opencv_objdetect400.lib;opencv_photo400.lib;opencv_shape400.lib;opencv_stitching400.lib;opencv_superres400.lib;opencv_video400.lib;opencv_videoio400.lib;opencv_videostab400.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%OPENCV_DIR%\x64\vc15\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%OPENCV_DIR%\x64\vc15\lib;ext\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ImageTransformation.cpp" />
+    <ClCompile Include="MotionController.cpp" />
     <ClCompile Include="Prediction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Puck.cpp" />
     <ClCompile Include="RockyHockeyMain.cpp" />
+    <ClCompile Include="SerialConnection.cpp" />
     <ClCompile Include="Tracker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="definitions.h" />
     <ClInclude Include="ImageTransformation.h" />
+    <ClInclude Include="MotionController.h" />
     <ClInclude Include="Prediction.h" />
     <ClInclude Include="Puck.h" />
     <ClInclude Include="RockyHockeyMain.h" />
+    <ClInclude Include="SerialConnection.h" />
     <ClInclude Include="Tracker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
