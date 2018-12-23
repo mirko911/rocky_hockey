@@ -33,6 +33,8 @@ void ImageTransformation::calculateValues(const std::vector<Vector>& points)
 
     std::cout << "[ImageTransform] maxwidth: " << m_maxWidth << ", maxheight: " << m_maxHeight << std::endl;
 
+	Config::get()->fieldWidth = m_maxWidth;
+	Config::get()->fieldHeight = m_maxHeight;
 
     cv::Point2f src_vertices[4] = {
         cv::Point2i(static_cast<int>(points[0].x()), static_cast<int>(points[0].y())),

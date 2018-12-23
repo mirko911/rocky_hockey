@@ -3,13 +3,13 @@
 #include <string>
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
+#include "Config.h"
 
 typedef Eigen::Vector2f Vector;
 typedef Eigen::Hyperplane<float, 2> Line;
 
 
-
-static constexpr struct Config {
+static constexpr struct ConfigLegacy {
     int camWidth = 480;
     int camHeight = 240;
     int targetFPS = 10;
@@ -28,7 +28,7 @@ struct Wall {
 };
 
 inline cv::Point Vector2Point(const Vector& vector) {
-    return cv::Point(vector.x(), vector.y());
+    return cv::Point2f(vector.x(), vector.y());
 }
 
 inline Vector Point2Vector(const cv::Point & point) {
@@ -41,7 +41,7 @@ inline Vector getMean(const std::deque<Vector>& queue)
     for (const auto &item : queue) {
         vector += item;
     }
-    return vector /= queue.size();
+    return vector /= static_cast<float>(queue.size());
 }
 
 inline std::string printVector(const Vector& vector) {

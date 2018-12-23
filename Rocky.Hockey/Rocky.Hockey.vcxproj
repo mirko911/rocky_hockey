@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="ImageTransformation.cpp" />
     <ClCompile Include="Prediction.cpp" />
     <ClCompile Include="main.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="Tracker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="ImageTransformation.h" />
     <ClInclude Include="Prediction.h" />

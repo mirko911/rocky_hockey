@@ -17,6 +17,7 @@
 #include <cpp-json/json.h>
 
 #include "definitions.h"
+#include "Config.h"
 #include "Puck.h"
 #include "Tracker.h"
 #include "ImageTransformation.h"
@@ -48,9 +49,6 @@ private:
     Tracker m_tracker;
     server m_server;
 
-    bool m_undist = true;
-    bool m_wrap = true;
-    bool m_stop = false;
     int m_frameCounter = 0;
 
     void startWebsocketServer();

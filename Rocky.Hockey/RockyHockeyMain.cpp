@@ -58,9 +58,9 @@ RockyHockeyMain::RockyHockeyMain(const std::string path) : m_captureDevice(path)
 RockyHockeyMain::RockyHockeyMain(const int camID) : m_captureDevice(camID)
 {
     std::cout << "[RockyHockeyMain] using webcam as capture device" << std::endl;
-    m_captureDevice.set(cv::CAP_PROP_FPS, 187);
-    m_captureDevice.set(cv::CAP_PROP_FRAME_WIDTH, 320);
-    m_captureDevice.set(cv::CAP_PROP_FRAME_HEIGHT, 240);
+    m_captureDevice.set(cv::CAP_PROP_FPS, Config::get()->camFPS);
+    m_captureDevice.set(cv::CAP_PROP_FRAME_WIDTH, Config::get()->camWidth);
+    m_captureDevice.set(cv::CAP_PROP_FRAME_HEIGHT, Config::get()->camHeight);
 }
 
 RockyHockeyMain::RockyHockeyMain()
@@ -71,6 +71,7 @@ RockyHockeyMain::RockyHockeyMain()
 
 void RockyHockeyMain::Init()
 {
+
     if (!m_captureDevice.isOpened())
     {
         std::cerr << "[RockyHockeyMain] Can't open the video device" << std::endl;
@@ -158,8 +159,8 @@ void RockyHockeyMain::worker_thread()
     std::chrono::duration<float> delta;
 
     // don't divide by zero
-    if (config.targetFPS > 0)
-        target_delta /= static_cast<float>(config.targetFPS);
+    if (Config::get()->targetFPS > 0)
+        target_delta /= static_cast<float>(Config::get()->targetFPS);
 
     std::string infoText = "";
 
@@ -177,7 +178,7 @@ void RockyHockeyMain::worker_thread()
     {
         before = std::chrono::steady_clock::now();
 
-        if (!m_stop) {
+        if (!Config::get()->pauseStream) {
             m_captureDevice >> m_imgSrc;
             m_frameCounter++;
         }
@@ -190,7 +191,7 @@ void RockyHockeyMain::worker_thread()
         cv::cvtColor(m_imgSrc, grayImage, cv::COLOR_BGR2GRAY);
 
         infoText = "";
-        if (m_undist) {
+        if (Config::get()->undistortImage) {
             imageTransform.undistort(grayImage, undistImage);
             infoText = "Undistored ";
         }
@@ -199,7 +200,7 @@ void RockyHockeyMain::worker_thread()
             infoText = "Distored ";
         }
 
-        if (m_wrap) {
+        if (Config::get()->wrapImage) {
             imageTransform.warpPerspective(undistImage, wrapImage);
             infoText += " Wrapped";
         }
@@ -267,13 +268,13 @@ void RockyHockeyMain::onKeyPress(const int key)
         cv::imwrite("test_image.png", m_imgSrc);
         break;
     case 'u':
-        m_undist = !m_undist;
+		Config::get()->undistortImage = !Config::get()->undistortImage;
         break;
     case 'w':
-        m_wrap = !m_wrap;
+		Config::get()->wrapImage = !Config::get()->wrapImage;
         break;
     case 'p':
-        m_stop = !m_stop;
+		Config::get()->pauseStream = !Config::get()->pauseStream;
     default:
         break;
     }

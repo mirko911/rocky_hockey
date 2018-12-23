@@ -2,7 +2,10 @@
 #define _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
 
 int main() {
-    RockyHockeyMain rockyhockey("./../../demos/demo_4.mkv");
+	//Make sure we got a config object before we start with rockyHockey
+	Config::get();
+
+    RockyHockeyMain rockyhockey("./../../demos/demo_1.mkv");
 
     rockyhockey.Init();
     rockyhockey.Run();

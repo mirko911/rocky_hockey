@@ -8,20 +8,20 @@ Prediction::Prediction()
     //We don't need to predict the movement in this direction
     m_walls = {
         Wall{
-            Line::Through(Vector(0,0), Vector(config.fieldWidth,0)), //TOP Wall
+            Line::Through(Vector(0,0), Vector(Config::get()->fieldWidth,0)), //TOP Wall
             Vector(0,0),
-            Vector(config.fieldWidth,0),
+            Vector(Config::get()->fieldWidth,0),
             Vector(0, -1),
         },
         Wall{
-            Line::Through(Vector(0, config.fieldHeight), Vector(config.fieldWidth, config.fieldHeight)), //BOTTOM Wall
-            Vector(0, config.fieldHeight),
-            Vector(config.fieldWidth, config.fieldHeight),
+            Line::Through(Vector(0, Config::get()->fieldHeight), Vector(Config::get()->fieldWidth, Config::get()->fieldHeight)), //BOTTOM Wall
+            Vector(0, Config::get()->fieldHeight),
+            Vector(Config::get()->fieldWidth, Config::get()->fieldHeight),
             Vector(0, 1),
         },
        // Wall{ //not sure if we need the third wall, because we should get an intersection with the defend
        // Line before we hit the wall
-      //      Line::Through(Vector(0,0), Vector(0, config.fieldHeight)), //LEFT Wall
+      //      Line::Through(Vector(0,0), Vector(0, Config::get()->fieldHeight)), //LEFT Wall
       //      Vector(1, 0),
        // },
     };
@@ -29,9 +29,9 @@ Prediction::Prediction()
     //Defind line with random magic numbers 
     //@todo find a better way
     m_defendLine = {
-        Line::Through(Vector(20, 0), Vector(20, config.fieldHeight)),
+        Line::Through(Vector(20, 0), Vector(20, Config::get()->fieldHeight)),
         Vector(20, 0),
-        Vector(20, config.fieldHeight),
+        Vector(20, Config::get()->fieldHeight),
         Vector(1,0)
     };
 }
@@ -134,9 +134,9 @@ void Prediction::setFieldSize(const cv::Size & size)
     //Adjust the wall positions, because we use the center of the circle for the
     //calculation. Therefore we need to subtract 0.5Radius from the wall.
     //Subtract -1, because we start with zero and not with 1
-    int width = size.width - config.puckRadius - 1;
-    int height = size.height - config.puckRadius -1;
-    int zero = 0 + static_cast<int>(config.puckRadius * 0.5f);
+    int width = size.width - Config::get()->puckRadius - 1;
+    int height = size.height - Config::get()->puckRadius -1;
+    int zero = 0 + static_cast<int>(Config::get()->puckRadius * 0.5f);
 
     m_walls = {
            Wall{
@@ -153,7 +153,7 @@ void Prediction::setFieldSize(const cv::Size & size)
            },
            //not sure if we need the third wall, because we should get an intersection with the defend
            // Wall{ 
-           //      Line::Through(Vector(0,0), Vector(0, config.fieldHeight)), //LEFT Wall
+           //      Line::Through(Vector(0,0), Vector(0, Config::get()->fieldHeight)), //LEFT Wall
            //      Vector(1, 0),
            // },
     };

@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "definitions.h"
+#include "Config.h"
 
 class ImageTransformation
 {

@@ -18,7 +18,7 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     std::vector < cv::Vec3f > circles;
 
     for (const auto &circle : circles) {
-        cv::circle(dst, cv::Point(circle[0], circle[1]), circle[2], cv::Scalar(0, 0, 255), 1, 8, 0);
+        cv::circle(dst, cv::Point2f(circle[0], circle[1]), circle[2], cv::Scalar(0, 0, 255), 1, 8, 0);
     }
 
 
@@ -47,7 +47,7 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 
     //Extract puck position and radius from array
     Vector position(circle[0], circle[1]);
-    int radius = circle[2];
+    int radius = static_cast<int>(circle[2]);
 
     Vector oldPosition = puck.getPosition();
     if (oldPosition.hasNaN()) {
@@ -73,7 +73,7 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 
 #ifdef _DEBUG
     //Draw a circle and an arrow to visualize the puck position and the direction
-    cv::circle(dst, cv::Point(position.x(), position.y()), radius, cv::Scalar(0, 0, 255), 1, 8, 0);
+    cv::circle(dst, cv::Point2f(position.x(), position.y()), radius, cv::Scalar(0, 0, 255), 1, 8, 0);
     
     if (puck.getDirection().hasNaN()) {
         //don't draw arrow if the direction vector is NaN
@@ -83,8 +83,8 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
     Vector arrowPos = position + (puck.getDirection() * 100);
     cv::arrowedLine(
         dst,
-        cv::Point(position.x(), position.y()),
-        cv::Point(arrowPos.x(), arrowPos.y()),
+        cv::Point2f(position.x(), position.y()),
+        cv::Point2f(arrowPos.x(), arrowPos.y()),
         cv::Scalar(255, 0, 0),
         2,
         8,
