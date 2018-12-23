@@ -26,23 +26,39 @@ void RockyHockeyMain::sendWSHeartBeat()
 {
 	auto heartbeat = json::object{};
 	heartbeat.insert("puck", json::object{
-						
-						{"position", json::object{
-							{"x", m_puck.getPosition().hasNaN() ? NULL : m_puck.getPosition().x()},
-							{"y", m_puck.getPosition().hasNaN() ? NULL: m_puck.getPosition().y()}
-						}},
-						{"direction", json::object{
-							{"x", m_puck.getDirection().hasNaN() ? NULL : m_puck.getDirection().x()},
-							{"y", m_puck.getDirection().hasNaN() ? NULL : m_puck.getDirection().y()}
-						}}
-		});
-	heartbeat.insert("settings", json::object{
-					{ "targetFPS", config.targetFPS },
-					{ "fps", m_FPS },
-					{ "wrap", m_wrap },
-					{ "undist", m_undist },
-					{"fieldSize", json::object{ {"width", 320}, {"height",240} }},
-		});
+						{"position", toJson(m_puck.getPosition())},
+						{"direction", toJson(m_puck.getDirection())}
+	});
+
+	json::object prediction;
+	//Prediction
+	json::array reflections;
+	for (const auto& reflection : m_prediction.getReflections()) {
+		reflections.append(json::object{
+						{"position", toJson(reflection.position)},
+						{"direction", toJson(reflection.direction)}
+			});
+	}
+	prediction.insert("reflections", reflections);
+
+	json::array walls;
+	for (const auto& wall : m_prediction.getWalls()) {
+		walls.append(json::object{
+						{"start", toJson(wall.start)},
+						{"end", toJson(wall.end)}
+			});
+	}
+	prediction.insert("walls", walls);
+
+	json::object defendLine = {
+		{"start", toJson(m_prediction.getDefendLine().start)},
+		{"end", toJson(m_prediction.getDefendLine().end)}
+	};
+	prediction.insert("defendLine", defendLine);
+	prediction.insert("predictedPosition", toJson(m_prediction.getPredictedPosition()));
+
+	heartbeat.insert("prediction", prediction);
+	heartbeat.insert("settings", Config::get()->asJson());
 
 	//std::cout << "[RockyHockeyWorker] Send websocket status" << std::endl;
 	for (auto it : m_websocketConnections) {
@@ -170,9 +186,8 @@ void RockyHockeyMain::worker_thread()
     cv::Mat wrapImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat debugImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
     m_imgDst = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
-    ImageTransformation imageTransform;
-    Prediction prediction;
-    prediction.setFieldSize(imageTransform.getFieldSize());
+
+    m_prediction.setFieldSize(m_imageTransform.getFieldSize());
 
     while (!m_exit)
     {
@@ -192,7 +207,7 @@ void RockyHockeyMain::worker_thread()
 
         infoText = "";
         if (Config::get()->undistortImage) {
-            imageTransform.undistort(grayImage, undistImage);
+            m_imageTransform.undistort(grayImage, undistImage);
             infoText = "Undistored ";
         }
         else {
@@ -201,7 +216,7 @@ void RockyHockeyMain::worker_thread()
         }
 
         if (Config::get()->wrapImage) {
-            imageTransform.warpPerspective(undistImage, wrapImage);
+            m_imageTransform.warpPerspective(undistImage, wrapImage);
             infoText += " Wrapped";
         }
         else {
@@ -226,7 +241,7 @@ void RockyHockeyMain::worker_thread()
        // if(m_frameCounter % 4 == 0) {
             m_tracker.Tick(workingImage, debugImage, m_puck);
        // }
-        prediction.tick(debugImage, m_puck);
+        m_prediction.tick(debugImage, m_puck);
 
         {
             std::mutex m;
@@ -247,7 +262,7 @@ void RockyHockeyMain::worker_thread()
 
         // if the frame was processed faster than necessary, wait the some time to reach the target frame rate
         // if targetFPS is 0, don't wait
-        if (delta < target_delta && config.targetFPS > 0)
+        if (delta < target_delta && Config::get()->targetFPS > 0)
         {
             std::this_thread::sleep_for(target_delta - delta);
         }

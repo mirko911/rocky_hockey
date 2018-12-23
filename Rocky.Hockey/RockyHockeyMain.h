@@ -47,7 +47,10 @@ private:
 
     Puck m_puck;
     Tracker m_tracker;
+	Prediction m_prediction;
+	ImageTransformation m_imageTransform;
     server m_server;
+
 
     int m_frameCounter = 0;
 

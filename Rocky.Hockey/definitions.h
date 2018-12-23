@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include "Config.h"
+#include <cpp-json/json.h>
+
 
 typedef Eigen::Vector2f Vector;
 typedef Eigen::Hyperplane<float, 2> Line;
@@ -46,6 +48,13 @@ inline Vector getMean(const std::deque<Vector>& queue)
 
 inline std::string printVector(const Vector& vector) {
     return "[" + std::to_string(vector.x()) + "," + std::to_string(vector.y()) + "]";
+}
+
+inline json::object toJson(const Vector& vector) {
+	return  {
+		{"x", vector.hasNaN() ? json::value::type_null : vector.x()},
+		{"y", vector.hasNaN() ? json::value::type_null : vector.y()},
+	};
 }
 
 inline bool isInsideWall(const Wall& wall, const Vector& vector) {

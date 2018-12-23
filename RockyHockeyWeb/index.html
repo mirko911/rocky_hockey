@@ -12,11 +12,11 @@
       .box{background: #fff; min-height: 400px; border:1px solid #ccc;}
       #log{height: 400px; overflow-y: scroll; width: 100%; display:block;}
       pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-.string { color: green; }
-.number { color: darkorange; }
-.boolean { color: blue; }
-.null { color: magenta; }
-.key { color: red; }
+    .string { color: green; }
+    .number { color: darkorange; }
+    .boolean { color: blue; }
+    .null { color: magenta; }
+    .key { color: red; }
     </style>
   </head>
   <body>
@@ -28,8 +28,21 @@
       </div>
       <div class="row">
         <div class="col-6 box">
-          <h2>Canvas</h2>
-          <canvas id="canvas" width="620" height="480"></canvas>
+          <div class="row">
+            <div class="col box">
+              <h2>Canvas</h2>
+              <canvas id="canvas" width="620" height="480"></canvas>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col box">
+              <h2>Puck</h2>
+              Pos: <pre class="text-monospace" id="puckPosition"></pre>
+              Dir: <pre class="text-monospace" id="puckDirection"></pre>
+              Prediction:    <pre class="text-monospace" id="predictedPosition"></pre>
+
+            </div>
+          </div>
         </div>
         <div class="col-6">
           <div class="row">

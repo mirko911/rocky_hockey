@@ -2,9 +2,15 @@
 var logElem = document.getElementById("log");
 var settings = document.getElementById("settings");
 var canvas = document.getElementById("canvas");
+var puckPos = document.getElementById("puckPosition");
+var puckDir = document.getElementById("puckDirection");
+var predictedPosition = document.getElementById("predictedPosition");
 
-function setSettings(settingsJson){
-  settings.innerHTML = syntaxHighlight(settingsJson) + "<br />\n";
+function setHTML(elem, json, highlight = true){
+  if(highlight)
+    elem.innerHTML = syntaxHighlight(json) + "<br />\n";
+  else
+    elem.innerHTML = JSON.stringify(json) + "<br />\n";
 }
 function logAppend(string){
   logElem.innerHTML = string + "<br />\n" + logElem.innerHTML;
@@ -30,6 +36,17 @@ function syntaxHighlight(json) {
         }
         return '<span class="' + cls + '">' + match + '</span>';
     });
+};
+
+function canvas_vectorDirection(context, position, direction, width, color){
+  direction.x *= 1000;
+  direction.y *= 1000;
+
+  destination = {
+    "x":position.x + direction.x,
+    "y": position.y + direction.y
+  };
+  canvas_line(context, position, destination, width, color)
 }
 
 function drawCanvas(data){
@@ -38,13 +55,19 @@ function drawCanvas(data){
   ctx.fillRect(0, 0, 640, 480);
 
   canvas_circle(ctx, data.puck.position, 11, "red");
+  canvas_vectorDirection(ctx, data.puck.position, data.puck.direction, 5, "green");
 
-  destination = {
-    "x" : data.puck.position.x + (data.puck.direction.x * 1000),
-    "y" : data.puck.position.y + (data.puck.direction.y * 1000),
+  canvas_line(ctx, data.prediction.defendLine.start, data.prediction.defendLine.end, 5, "yellow");
+  for(i = 0; i < data.prediction.walls.length; i++){
+    wall = data.prediction.walls[i];
+    canvas_line(ctx, wall.start, wall.end, 5, "lightgreen");
   }
-  console.log(destination);
-  canvas_arrow(ctx, data.puck.position, destination, 10, "green");
+  console.log(data.prediction.reflections.length);
+  for(i = 0; i < data.prediction.reflections.length; i++){
+    prediction = data.prediction.reflections[i];
+    canvas_vectorDirection(ctx, prediction.position, prediction.direction, 5, "lightblue");
+  }
+  canvas_circle(ctx, data.prediction.predictedPosition, 10, "white");
 }
 
 function canvas_circle(context, position, radius, color){
@@ -55,7 +78,7 @@ function canvas_circle(context, position, radius, color){
   context.closePath();
 }
 
-function canvas_arrow(context, fromPosition, toPosition, r,  color){
+function canvas_line(context, fromPosition, toPosition, lineWidth, color){
     fromPosition.x *=2;
     fromPosition.y *=2;
     toPosition.x *= 2;
@@ -65,7 +88,7 @@ function canvas_arrow(context, fromPosition, toPosition, r,  color){
     context.moveTo(fromPosition.x, fromPosition.y);
     context.lineTo(toPosition.x,toPosition.y);
     context.strokeStyle = color;
-    context.lineWidth = 5;
+    context.lineWidth = lineWidth;
     context.stroke();
     context.closePath();
 }
@@ -80,7 +103,10 @@ function onClose(e){
 
 function onMessage(e) {
   data = JSON.parse(e.data);
-  setSettings(data);
+  setHTML(settings, data.settings);
+  setHTML(puckPos, data.puck.position, false);
+  setHTML(puckDir, data.puck.direction, false)
+  setHTML(predictedPosition, data.prediction.predictedPosition, false);
   drawCanvas(data);
 };
 
