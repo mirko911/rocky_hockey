@@ -3,11 +3,12 @@
 #include <string>
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
+#include "Config.h"
 
 typedef Eigen::Vector2f Vector;
 typedef Eigen::Hyperplane<float, 2> Line;
 
-static constexpr struct Config {
+static constexpr struct ConfigLegacy {
     int camWidth = 480;
     int camHeight = 240;
     int targetFPS = 10;

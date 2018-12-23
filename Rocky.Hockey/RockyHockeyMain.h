@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "definitions.h"
+#include "Config.h"
 #include "Puck.h"
 #include "Tracker.h"
 #include "ImageTransformation.h"
@@ -29,9 +30,6 @@ private:
     Puck m_puck;
     Tracker m_tracker;
 
-    bool m_undist = true;
-    bool m_wrap = true;
-    bool m_stop = false;
     int m_frameCounter = 0;
 public:
     bool m_exit = false;
