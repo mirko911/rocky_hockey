@@ -3,37 +3,55 @@
 MotionController::MotionController(const std::string tty_name, const int baudRate) : m_serial()
 {
    // m_serial.connect(tty_name, baudRate);
+
+	//Prebuild the rotation matrix
+	float angle = 45 * 3.141592653f / 180.0f;
+	m_rotationMatrix <<
+		cos(angle) * m_ratioX, -sin(angle),
+		sin(angle), cos(angle) * m_ratioY;
 }
 
 void MotionController::moveToPosition(const Vector position)
 {
-    float angle = -45;
-    float x = cos(angle)*position.x() - sin(angle) * position.y();
-    float y = sin(angle)*position.x() + cos(angle) * position.y();
-    Vector rotated_position = Vector(x, y);
+	Vector position1 = Vector(296, 293);
+	
+	Vector result = m_rotationMatrix * position1;
+  
+    m_serial.send(BYTE_START);
+    m_serial.send(COMMAND_MOVE);
+    m_serial.send(static_cast<int16_t>(result.x() * m_ratioX));
+    m_serial.send(COMMAND_MOVE);
+    m_serial.send(static_cast<int16_t>(result.y() * m_ratioY));
+    m_serial.send(BYTE_END);
+}
 
-    Vector position_motion_space = Vector(
-        rotated_position.x() * m_ratioX,
-        rotated_position.y() * m_ratioY
-    );
+void MotionController::setVelocity(const int x, const int y)
+{
+	m_serial.send(BYTE_START);
+	m_serial.send(COMMAND_VELOCITY);
+	m_serial.send(static_cast<int16_t>(x));
+	m_serial.send(COMMAND_VELOCITY);
+	m_serial.send(static_cast<int16_t>(y));
+	m_serial.send(BYTE_END);
+}
 
-    float newx = position_motion_space.x();
-    float newY = position_motion_space.y();
-
-    m_serial.send(static_cast<uint8_t>(BYTE_START));
-    m_serial.send(static_cast<uint8_t>(COMMAND_MOVE));
-    m_serial.send(static_cast<int16_t>(position_motion_space.x()));
-    m_serial.send(static_cast<uint8_t>(COMMAND_MOVE));
-    m_serial.send(static_cast<int16_t>(position_motion_space.y()));
-    m_serial.send(static_cast<uint8_t>(BYTE_END));
+void MotionController::setAcceleration(const int x, const int y)
+{
+	m_serial.send(BYTE_START);
+	m_serial.send(COMMAND_ACCELERATION);
+	m_serial.send(static_cast<int16_t>(x));
+	m_serial.send(COMMAND_ACCELERATION);
+	m_serial.send(static_cast<int16_t>(y));
+	m_serial.send(BYTE_END);
 }
 
 void MotionController::calculateRatio(const cv::Size & size)
 {
-    m_ratioX = 6000.0f / size.width;
-    m_ratioY = 6000.0f / 50.0f; //6000
+	m_ratioX = 6000.0f / 50.0f;
+	m_ratioY = 6000.0f / size.height; //6000
 }
 
 MotionController::~MotionController()
 {
+	m_serial.quit();
 }
