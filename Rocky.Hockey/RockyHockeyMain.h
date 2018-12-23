@@ -53,7 +53,7 @@ private:
     bool m_stop = false;
     int m_frameCounter = 0;
 
-    void startBrodCastServer();
+    void startWebsocketServer();
 	void sendWSHeartBeat();
 public:
     bool m_exit = false;

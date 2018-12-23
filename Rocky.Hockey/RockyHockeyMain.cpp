@@ -1,7 +1,25 @@
 #include "RockyHockeyMain.h"
 
-void RockyHockeyMain::startBrodCastServer()
+void RockyHockeyMain::startWebsocketServer()
 {
+	m_server.set_open_handler(bind(&RockyHockeyMain::onWSOpen, this, ::_1));
+	m_server.set_close_handler(bind(&RockyHockeyMain::onWSClose, this, ::_1));
+
+	std::cout << "[RockyHockeyWebsocket] Init websocket" << std::endl;
+
+	m_server.init_asio();
+	std::cout << "[RockyHockeyWebsocket] start listening on Port 9003" << std::endl;
+	m_server.listen(9003);
+	m_server.start_accept();
+
+#ifndef DEBUG
+	m_server.set_access_channels(websocketpp::log::alevel::none);
+#endif // !DEBUG
+
+	//m_server.run();
+
+	std::cout << "[RockyHockeyWebsocket] started websocket thread" << std::endl;
+	m_workerWebsocket = std::make_unique<std::thread>((std::bind(&server::run, &m_server)));
 }
 
 void RockyHockeyMain::sendWSHeartBeat()
@@ -69,18 +87,8 @@ void RockyHockeyMain::Init()
     m_imgSrc.copyTo(m_imgDst);
 
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
-   // m_workerWebsocket = std::make_unique<std::thread>(&RockyHockeyMain::worker_websocket, this);
 
-    m_server.set_open_handler(bind(&RockyHockeyMain::onWSOpen, this, ::_1));
-    m_server.set_close_handler(bind(&RockyHockeyMain::onWSClose, this, ::_1));
-	m_server.init_asio();
-    //m_server.set_message_handler(bind(&RockyHockeyMain::on_message, this, ::_1, ::_2));
-    m_server.listen(9003);
-	m_server.start_accept();
-    //m_server.run();
-
-	std::cout << "[RockyHockeyWorker] started websocket thread" << std::endl;
-    m_workerWebsocket = std::make_unique<std::thread>((std::bind(&server::run, &m_server)));
+	startWebsocketServer();
 }
 
 void RockyHockeyMain::Run()
