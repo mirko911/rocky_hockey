@@ -12,6 +12,9 @@
 
 #include <websocketpp/server.hpp>
 #include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/common/thread.hpp>
+
+#include <cpp-json/json.h>
 
 #include "definitions.h"
 #include "Puck.h"
@@ -33,7 +36,7 @@ class RockyHockeyMain
 {
 private:
     typedef std::set<connection_hdl, std::owner_less<connection_hdl>> con_list;
-    con_list m_connections;
+    con_list m_websocketConnections;
     cv::VideoCapture m_captureDevice;
     cv::Mat m_imgSrc;
     cv::Mat m_imgDst;
@@ -51,6 +54,7 @@ private:
     int m_frameCounter = 0;
 
     void startBrodCastServer();
+	void sendWSHeartBeat();
 public:
     bool m_exit = false;
     int cannyLow = 176;
@@ -65,10 +69,9 @@ public:
     void Fini();
 
     void worker_thread();
-    void worker_websocket();
     void onKeyPress(const int key);
-    void onOpen(connection_hdl hdl);
-    void onClose(connection_hdl hdl);
+    void onWSOpen(connection_hdl hdl);
+    void onWSClose(connection_hdl hdl);
     ~RockyHockeyMain();
 };
 

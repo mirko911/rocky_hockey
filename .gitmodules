@@ -4,3 +4,6 @@
 [submodule "Rocky.Hockey/ext/websocketpp"]
 	path = Rocky.Hockey/ext/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "Rocky.Hockey/ext/cpp-json"]
+	path = Rocky.Hockey/ext/cpp-json
+	url = https://github.com/eteran/cpp-json.git

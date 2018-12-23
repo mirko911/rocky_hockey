@@ -4,6 +4,34 @@ void RockyHockeyMain::startBrodCastServer()
 {
 }
 
+void RockyHockeyMain::sendWSHeartBeat()
+{
+	auto heartbeat = json::object{};
+	heartbeat.insert("puck", json::object{
+						
+						{"position", json::object{
+							{"x", m_puck.getPosition().hasNaN() ? NULL : m_puck.getPosition().x()},
+							{"y", m_puck.getPosition().hasNaN() ? NULL: m_puck.getPosition().y()}
+						}},
+						{"direction", json::object{
+							{"x", m_puck.getDirection().hasNaN() ? NULL : m_puck.getDirection().x()},
+							{"y", m_puck.getDirection().hasNaN() ? NULL : m_puck.getDirection().y()}
+						}}
+		});
+	heartbeat.insert("settings", json::object{
+					{ "targetFPS", config.targetFPS },
+					{ "fps", m_FPS },
+					{ "wrap", m_wrap },
+					{ "undist", m_undist },
+					{"fieldSize", json::object{ {"width", 320}, {"height",240} }},
+		});
+
+	//std::cout << "[RockyHockeyWorker] Send websocket status" << std::endl;
+	for (auto it : m_websocketConnections) {
+		m_server.send(it, stringify(heartbeat), websocketpp::frame::opcode::text);
+	}
+}
+
 RockyHockeyMain::RockyHockeyMain(const std::string path) : m_captureDevice(path)
 {
     std::cout << "[RockyHockeyMain] using a file as capture device" << std::endl;
@@ -43,14 +71,16 @@ void RockyHockeyMain::Init()
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
    // m_workerWebsocket = std::make_unique<std::thread>(&RockyHockeyMain::worker_websocket, this);
 
-    m_server.set_open_handler(bind(&RockyHockeyMain::onOpen, this, ::_1));
-    m_server.set_close_handler(bind(&RockyHockeyMain::onClose, this, ::_1));
+    m_server.set_open_handler(bind(&RockyHockeyMain::onWSOpen, this, ::_1));
+    m_server.set_close_handler(bind(&RockyHockeyMain::onWSClose, this, ::_1));
+	m_server.init_asio();
     //m_server.set_message_handler(bind(&RockyHockeyMain::on_message, this, ::_1, ::_2));
-    //m_server.listen(9002);
-   // m_server.start_accept();
+    m_server.listen(9003);
+	m_server.start_accept();
     //m_server.run();
 
-   // std::thread webSocketSrvThread(std::bind(&server::run, &m_server, 9002));
+	std::cout << "[RockyHockeyWorker] started websocket thread" << std::endl;
+    m_workerWebsocket = std::make_unique<std::thread>((std::bind(&server::run, &m_server)));
 }
 
 void RockyHockeyMain::Run()
@@ -106,7 +136,9 @@ void RockyHockeyMain::Fini()
     std::cout << std::endl << "[RockyHockeyMain] received exit signal" << std::endl;
 
     m_workerThread->join();
-    std::cout << "[RockyHockeyWorker] stopping worker thread" << std::endl;
+	m_workerWebsocket->join();
+
+    std::cout << "[RockyHockeyWorker] stopping worker threads" << std::endl;
 }
 
 void RockyHockeyMain::worker_thread()
@@ -179,6 +211,9 @@ void RockyHockeyMain::worker_thread()
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
+		sendWSHeartBeat();
+
+	
        // if(m_frameCounter % 4 == 0) {
             m_tracker.Tick(workingImage, debugImage, m_puck);
        // }
@@ -210,43 +245,6 @@ void RockyHockeyMain::worker_thread()
     }
 }
 
-void RockyHockeyMain::worker_websocket()
-{
-    std::cout << "[RockyHockeyWorker] started websocket thread" << std::endl;
-
-    m_server.init_asio();
-
-
-
-    std::chrono::steady_clock::time_point before;
-    std::chrono::steady_clock::time_point after;
-    std::chrono::duration<float> target_delta = std::chrono::seconds(1);
-    std::chrono::duration<float> delta;
-
-    // don't divide by zero
-        target_delta /= 30.0f;
-
-        while (!m_exit) {
-            std::cout << "[RockyHockeyWorker] Send websocket status" << std::endl;
-            for (auto it : m_connections) {
-                m_server.send(it, "TEST", websocketpp::frame::opcode::text);
-            }
-
-
-            after = std::chrono::steady_clock::now();
-            // measure time it took to process the image
-            delta = std::chrono::duration_cast<std::chrono::microseconds>(after - before);
-
-            // if the frame was processed faster than necessary, wait the some time to reach the target frame rate
-            // if targetFPS is 0, don't wait
-            std::this_thread::sleep_for(target_delta - delta);
-            
-        }
-
-        std::cout << "[RockyHockeyWorker] stoping websocket thread" << std::endl;
-
-}
-
 void RockyHockeyMain::onKeyPress(const int key)
 {
     std::cout << "[RockyHockeyMain] onKeyPress. Detected key \"" << key << "\"" << std::endl;
@@ -273,15 +271,15 @@ void RockyHockeyMain::onKeyPress(const int key)
     }
 }
 
-void RockyHockeyMain::onOpen(connection_hdl hdl)
+void RockyHockeyMain::onWSOpen(connection_hdl hdl)
 {
     std::cout << "[Websocket] New Connection" << std::endl;
-    m_connections.insert(hdl);
+    m_websocketConnections.insert(hdl);
 }
 
-void RockyHockeyMain::onClose(connection_hdl hdl)
+void RockyHockeyMain::onWSClose(connection_hdl hdl)
 {
-    m_connections.erase(hdl);
+    m_websocketConnections.erase(hdl);
 }
 
 RockyHockeyMain::~RockyHockeyMain()
