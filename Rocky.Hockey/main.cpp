@@ -1,5 +1,4 @@
 #include "RockyHockeyMain.h"
-#define _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
 
 int main() {
 	//Make sure we got a config object before we start with rockyHockey

@@ -54,17 +54,17 @@ void SerialConnection::startReceive()
 
 void SerialConnection::send(const std::string & text)
 {
-    boost::asio::write(m_port, boost::asio::buffer(text));
+ //   boost::asio::write(m_port, boost::asio::buffer(text));
 }
 
 void SerialConnection::send(const uint8_t text)
 {
-    boost::asio::write(m_port, boost::asio::buffer(&text, 1));
+//    boost::asio::write(m_port, boost::asio::buffer(&text, 1));
 }
 
 void SerialConnection::send(const int16_t text)
 {
-    boost::asio::write(m_port, boost::asio::buffer(&text, 1));
+  //  boost::asio::write(m_port, boost::asio::buffer(&text, 1));
 }
 
 
