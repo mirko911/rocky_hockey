@@ -120,8 +120,11 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         }
         i++;
     }
-    m_predictedPosition = getMean(m_predictionQueue);
-    cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
+	if (m_predictionQueue.size() >= 7) {
+		m_predictedPosition = getMean(m_predictionQueue);
+		cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
+	}
+    
 
     for (const Wall &wall : m_walls) {
     }

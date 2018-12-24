@@ -3,6 +3,7 @@
 Tracker::Tracker()
 {
     std::cout << "[Tracker] created tracker" << std::endl;
+
 }
 
 bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
@@ -15,83 +16,82 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
         m_wrongDetections = 0;
     }
 
-    std::vector < cv::Vec3f > circles;
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::RNG rng;
 
-    for (const auto &circle : circles) {
-        cv::circle(dst, cv::Point2f(circle[0], circle[1]), circle[2], cv::Scalar(0, 0, 255), 1, 8, 0);
-    }
+	int i = 0;
+	findContours(src, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE, cv::Point(0, 0));
+	for (const auto &contour : contours) {
+
+		cv::Moments moms = cv::moments(cv::Mat(contour));
+
+		double area = moms.m00; //238, 254
+
+		if (area < 154.0 || area > 283.0) {
+			i++;
+			continue;
+		}
+
+		double perimeter = cv::arcLength(contour, true);
+		double roundness = (perimeter*perimeter) / (6.28*area);
+
+		if (roundness > 5) {
+			continue;
+		}
+
+		
+		// Calculate object center
+		// We are using 320x240 pix but we are going to output the 640x480 equivalent (*2)
+		double posX = floor(moms.m10 / (double)area + 0.5); // round
+		double posY = floor(moms.m01 / (double)area + 0.5);
+		Vector position(static_cast<float>(posX), static_cast<float>(posY));
+		cv::circle(dst, Vector2Point(position), 8, cv::Scalar(255, 0, 0), 1);
 
 
+		//compute blob radius
+		
+			std::vector<double> dists;
+			for (size_t pointIdx = 0; pointIdx < contour.size(); pointIdx++)
+			{
+				cv::Point2d pt = contour[pointIdx];
+				dists.push_back(cv::norm(static_cast<cv::Point2d>(Vector2Point(position)) - pt));
+			}
+			std::sort(dists.begin(), dists.end());
+			double radius = (dists[(dists.size() - 1) / 2] + dists[dists.size() / 2]) / 2.;
+			puck.setRadius(static_cast<float>(radius));
+			Config::get()->puckRadius = static_cast<float>(radius);
 
-    //https://dsp.stackexchange.com/questions/22648/in-opecv-function-hough-circles-how-does-parameter-1-and-2-affect-circle-detecti
-    /// Apply the Hough Transform to find the circles
-    cv::HoughCircles(src, circles, cv::HOUGH_GRADIENT, static_cast<float>(dp/10.0f), src.rows/8, threshold1, threshold2, minArea, maxArea);
+		std::cout << printVector(position) << std::endl;
 
-    if (circles.size() == 0) {
-        //std::cerr << "[Tracker] Nothing found" << std::endl;
-        m_wrongDetections++;
-        return false;
-    }
+		i++;
 
-    if (circles.size() > 1) {
-        //std::cerr << "[Tracker] Found more then 1 puck" << std::endl;
-        m_wrongDetections++;
-     //   return false;
-    }
 
-    //Reset the wrong detection status
-    m_wrongDetections = 0;
+		Vector oldPosition = puck.getPosition();
+		if (oldPosition.hasNaN()) {
+			oldPosition = position;
+			puck.setPosition(position);
+		}
 
-    //We don't need a loop, because we only need the 1st element
-    cv::Vec3f circle = circles[0];
+		//Calculate mean of all old directions and blend them with a 2:1 ratio into a new direction
+		Vector direction = Vector((position - oldPosition));
+		Vector oldDirection = puck.getDirection();
+		if (oldDirection.hasNaN()) {
+			oldDirection = direction;
+		}
+		Vector direction_blend = (direction + oldDirection) * 0.5f;
+		float distance = direction.norm();
 
-    //Extract puck position and radius from array
-    Vector position(circle[0], circle[1]);
-    int radius = static_cast<int>(circle[2]);
+		//Pass new vectors to puck class
+		if (distance >= 5.0f) {
+			puck.setPosition(position);
+			puck.setDirection(direction);
+		}
+		puck.setVelocity(distance);
+	}
 
-    Vector oldPosition = puck.getPosition();
-    if (oldPosition.hasNaN()) {
-        oldPosition = position;
-        puck.setPosition(position);
-    }
 
-    //Calculate mean of all old directions and blend them with a 2:1 ratio into a new direction
-    Vector direction = Vector((position - oldPosition));
-    Vector oldDirection = puck.getDirection();
-    if (oldDirection.hasNaN()) {
-        oldDirection = direction;
-    }
-    Vector direction_blend = (direction + oldDirection) * 0.5f;
-    float distance = direction.norm();
-
-    //Pass new vectors to puck class
-    if (distance >= 5.0f) {
-        puck.setPosition(position);
-        puck.setDirection(direction);
-    }
-    puck.setVelocity(distance);
-
-#ifdef _DEBUG
-    //Draw a circle and an arrow to visualize the puck position and the direction
-    cv::circle(dst, cv::Point2f(position.x(), position.y()), radius, cv::Scalar(0, 0, 255), 1, 8, 0);
     
-    if (puck.getDirection().hasNaN()) {
-        //don't draw arrow if the direction vector is NaN
-        return true;
-    }
-
-    Vector arrowPos = position + (puck.getDirection() * 100);
-    cv::arrowedLine(
-        dst,
-        cv::Point2f(position.x(), position.y()),
-        cv::Point2f(arrowPos.x(), arrowPos.y()),
-        cv::Scalar(255, 0, 0),
-        2,
-        8,
-        0,
-        0.1f
-    );
-#endif
     return true;
 }
 

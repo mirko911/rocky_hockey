@@ -10,8 +10,7 @@ class Tracker
 {
 private:
     int m_wrongDetections = 0;
-
-
+	cv::Ptr<cv::SimpleBlobDetector> m_blobdetector;
 public:
     Tracker();
     bool Tick(const cv::Mat &src, cv::Mat &dst, Puck& puck);

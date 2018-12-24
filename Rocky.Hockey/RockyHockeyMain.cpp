@@ -164,11 +164,14 @@ void RockyHockeyMain::worker_thread()
 
         workingImage = wrapImage;
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
+		cv::dilate(workingImage, workingImage, 0);
+		cv::erode(workingImage, workingImage, 0);
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
        // if(m_frameCounter % 4 == 0) {
             m_tracker.Tick(workingImage, debugImage, m_puck);
        // }
+		prediction.setFieldSize(imageTransform.getFieldSize());
         prediction.tick(debugImage, m_puck);
 
         {
