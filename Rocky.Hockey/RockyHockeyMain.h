@@ -22,6 +22,8 @@
 #include "Tracker.h"
 #include "ImageTransformation.h"
 #include "Prediction.h"
+#include "MotionController.h"
+
 
 typedef websocketpp::server<websocketpp::config::asio> server;
 using websocketpp::connection_hdl;

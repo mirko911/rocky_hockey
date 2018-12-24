@@ -88,6 +88,11 @@ RockyHockeyMain::RockyHockeyMain()
 void RockyHockeyMain::Init()
 {
 
+    MotionController moCo("TEST", 9000);
+    Vector position(50, 120);
+    moCo.calculateRatio(cv::Size(320, 240));
+    moCo.moveToPosition(position);
+
     if (!m_captureDevice.isOpened())
     {
         std::cerr << "[RockyHockeyMain] Can't open the video device" << std::endl;
