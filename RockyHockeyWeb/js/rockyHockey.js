@@ -54,19 +54,34 @@ function drawCanvas(data){
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, 640, 480);
 
+//Draw Puck
   canvas_circle(ctx, data.puck.position, 11, "red");
   canvas_vectorDirection(ctx, data.puck.position, data.puck.direction, 5, "green");
+/*
+//Draw Field
+  let top_left = {"x": 1, "y": 1};
+  let top_right = {"x": data.settings.field.width, "y": 1};
+  let bottom_left = {"x": 1, "y": data.settings.field.height};
+  let bottom_right = {"x": data.settings.field.width, "y": data.settings.field.height};
 
+  canvas_line(ctx, top_left, top_right, 10, "white");
+  canvas_line(ctx, top_left, bottom_left, 10, "white");
+  canvas_line(ctx, bottom_left, bottom_right, 10, "yellow");
+  canvas_line(ctx, top_right, bottom_right, 10, "orange");
+*/
+//Draw imaginary borders (walls, defendlines)
   canvas_line(ctx, data.prediction.defendLine.start, data.prediction.defendLine.end, 5, "yellow");
   for(i = 0; i < data.prediction.walls.length; i++){
     wall = data.prediction.walls[i];
     canvas_line(ctx, wall.start, wall.end, 5, "lightgreen");
   }
-  console.log(data.prediction.reflections.length);
+
+//Draw Wall Reflections
   for(i = 0; i < data.prediction.reflections.length; i++){
     prediction = data.prediction.reflections[i];
     canvas_vectorDirection(ctx, prediction.position, prediction.direction, 5, "lightblue");
   }
+//Draw predicted puck position
   canvas_circle(ctx, data.prediction.predictedPosition, 10, "white");
 }
 
@@ -110,10 +125,18 @@ function onMessage(e) {
   drawCanvas(data);
 };
 
-logAppend("Try to open websocket connection");
+var ws;
+function connect(){
+  ws = new WebSocket("ws://127.0.0.1:9003");
 
-let ws = new WebSocket("ws://127.0.0.1:9003");
+  ws.onmessage = onMessage;
+  ws.onopen = onOpen;
+  ws.onClose = onClose;
+  logAppend("Try to open websocket connection");
+}
 
-ws.onmessage = onMessage;
-ws.onopen = onOpen;
-ws.onClose = onClose;
+function disconnect(){
+  ws.onclose = function () {}; // disable onclose handler first
+  ws.close();
+  logAppend("Closed Websocket connection");
+}
