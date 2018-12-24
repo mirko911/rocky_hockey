@@ -15,8 +15,8 @@ static constexpr struct ConfigLegacy {
     int camWidth = 480;
     int camHeight = 240;
     int targetFPS = 10;
-    int fieldWidth = 1000;
-    int fieldHeight = 1000;
+    int fieldWidth = 320;
+    int fieldHeight = 240;
     int wrongDetectionThreshold = 10;
     int puckRadius = 8;
 } config;
