@@ -5,10 +5,10 @@
 std::vector<Vector> ImageTransformation::findCornerPoints()
 {
     std::vector<Vector> points = {
-    {27,38}, //Top Left
-    {282,42},  //Top Right
-    {25, 193}, //Bottom Left
-    {279, 191} //Bottom right
+    {15,32}, //Top Left
+    {280,38},  //Top Right
+    {23, 195}, //Bottom Left
+    {277, 192} //Bottom right
     };
 
     std::cout << "[ImageTransform] foud corner points :" ;

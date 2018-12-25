@@ -8,11 +8,11 @@ public:
 	int camWidth = 320;
 	int camHeight = 240;
 	int camFPS = 120;
-	int targetFPS = 60;
+	int targetFPS = 10;
 	int fieldWidth = 320;
 	int fieldHeight = 240;
 	int wrongDetectionThreshold = 10;
-	float puckRadius = 8.0f;
+	float puckRadius = 7.81f;
 
 	bool wrapImage = true;
 	bool undistortImage = true;

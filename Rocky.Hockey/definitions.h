@@ -57,7 +57,7 @@ inline json::object toJson(const Vector& vector) {
 	};
 }
 
-inline bool isInsideWall(const Wall& wall, const Vector& vector) {
+inline bool isInsideWall(const Wall& wall, const Vector& vector, const double eps = 1) {
     float x = vector.x(); float y = vector.y();
 
     float leftx = wall.start.x();
@@ -66,6 +66,6 @@ inline bool isInsideWall(const Wall& wall, const Vector& vector) {
     float rightx = wall.end.x();
     float righty = wall.end.y();
 
-    return ((x >= leftx - 0.0003f && x <= rightx + 0.0003f) || (x >= rightx - 0.0003f && x <= leftx + 0.0003f))
-        && ((y >= lefty - 0.0003f && y <= righty + 0.0003f) || (y >= righty - 0.0003f && y <= lefty + 0.0003f));
+    return ((x >= leftx - eps && x <= rightx + eps) || (x >= rightx - eps && x <= leftx + eps))
+        && ((y >= lefty - eps && y <= righty + eps) || (y >= righty - eps && y <= lefty + eps));
 }

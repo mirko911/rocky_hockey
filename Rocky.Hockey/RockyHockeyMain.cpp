@@ -108,6 +108,8 @@ void RockyHockeyMain::Init()
     }
     m_imgSrc.copyTo(m_imgDst);
 
+	pBgSub = cv::bgsubcnt::createBackgroundSubtractorCNT(60, true, 60 * 60 ,true);
+
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
 
 	startWebsocketServer();
@@ -240,15 +242,15 @@ void RockyHockeyMain::worker_thread()
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
 		cv::dilate(workingImage, workingImage, 0);
 		cv::erode(workingImage, workingImage, 0);
+		pBgSub->apply(workingImage, workingImage);
+
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
 		sendWSHeartBeat();
 
 	
-       // if(m_frameCounter % 4 == 0) {
-            m_tracker.Tick(workingImage, debugImage, m_puck);
-       // }
-		m_prediction.setFieldSize(m_imageTransform.getFieldSize());
+        m_tracker.Tick(workingImage, debugImage, m_puck);
+		//m_prediction.setFieldSize(m_imageTransform.getFieldSize());
         m_prediction.tick(debugImage, m_puck);
 
         {
@@ -288,7 +290,7 @@ void RockyHockeyMain::onKeyPress(const int key)
         m_exit = true;
         break;
     case 's':
-        cv::imwrite("test_image.png", m_imgSrc);
+        cv::imwrite("test_image.png", m_imgDst);
         break;
     case 'u':
 		Config::get()->undistortImage = !Config::get()->undistortImage;

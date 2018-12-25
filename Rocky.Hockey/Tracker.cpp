@@ -59,8 +59,8 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 			}
 			std::sort(dists.begin(), dists.end());
 			double radius = (dists[(dists.size() - 1) / 2] + dists[dists.size() / 2]) / 2.;
-			puck.setRadius(static_cast<float>(radius));
-			Config::get()->puckRadius = static_cast<float>(radius);
+			//puck.setRadius(static_cast<float>(radius));
+			//Config::get()->puckRadius = static_cast<float>(radius);
 
 		std::cout << printVector(position) << std::endl;
 

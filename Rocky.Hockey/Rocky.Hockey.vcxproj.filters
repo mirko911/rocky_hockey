@@ -34,12 +34,15 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Config.cpp">
-	      <Filter>Quelldateien</Filter>
+      <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="MotionController.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="SerialConnection.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\BackgroundSubtractorCNT\bgsubcnt.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,12 +66,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Config.h">
-	  <Filter>Headerdateien</Filter>
-	</ClInclude>
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
     <ClInclude Include="MotionController.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="SerialConnection.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\BackgroundSubtractorCNT\bgsubcnt.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

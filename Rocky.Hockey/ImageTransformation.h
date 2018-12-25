@@ -1,6 +1,7 @@
 #pragma once
 #include <opencv2/opencv.hpp>
 #include <cmath>
+#include <vector>
 
 #include "definitions.h"
 #include "Config.h"
@@ -27,9 +28,13 @@ private:
     int m_maxHeight;
     cv::Mat m_map1;
     cv::Mat m_map2;
+	std::vector<cv::Mat> m_referenceFrames;
+	cv::Mat m_referenceFrame;
     std::vector<Vector> findCornerPoints();
     void calculateValues(const std::vector<Vector> & points);
 public:
+	cv::Mat getReferenceFrame() const;
+	void setReferenceFrames(const std::vector<cv::Mat> & refFrames);
     void undistort(cv::Mat &src, cv::Mat &dst);
     void warpPerspective(cv::Mat &src, cv::Mat &dst);
     cv::Size getFieldSize();

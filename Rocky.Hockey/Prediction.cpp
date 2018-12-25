@@ -106,10 +106,18 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
             //Also check if the intersection has the correct direction
             auto wallIntersection = wall.line.intersection(trajectoryLine);
             intersection = Vector(wallIntersection.x(), wallIntersection.y());
-            if (intersection.hasNaN() || intersection.x() > position.x() || !isInsideWall(wall, intersection)) {
-                std::cout << "Wrong intersection" << std::endl;
-                continue;
-            }
+			if (intersection.hasNaN()) {
+				std::cerr << "Wrong intersection (intersection)" << j << printVector(intersection) << std::endl;
+				continue;
+			}
+			else if (intersection.x() > position.x()) {
+				std::cerr << "Wrong intersection (x axis)" << j << std::endl;
+				continue;
+			}
+			else if (!isInsideWall(wall, intersection)) {
+				std::cerr << "Wrong intersection (outside wall)" << j << printVector(intersection)  << std::endl;
+				continue;
+			}
 
             std::cout << "Intersect on Wall " << j << std::endl;
 
@@ -124,7 +132,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         }
         i++;
     }
-	if (m_predictionQueue.size() >= 7) {
+	if (m_predictionQueue.size() >= 4) {
 		m_predictedPosition = getMean(m_predictionQueue);
 		cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
 	}
@@ -143,7 +151,7 @@ void Prediction::setFieldSize(const cv::Size & size)
     //Subtract -1, because we start with zero and not with 1
     int width = size.width - Config::get()->puckRadius - 1;
     int height = size.height - Config::get()->puckRadius -1;
-    int zero = 0 + static_cast<int>(Config::get()->puckRadius * 0.5f);
+    int zero = 0 + static_cast<int>(Config::get()->puckRadius);
 
     m_walls = {
            Wall{

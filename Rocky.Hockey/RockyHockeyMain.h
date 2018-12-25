@@ -16,6 +16,9 @@
 
 #include <cpp-json/json.h>
 
+#include "ext/BackgroundSubtractorCNT/bgsubcnt.h"
+
+
 #include "definitions.h"
 #include "Config.h"
 #include "Puck.h"
@@ -52,6 +55,7 @@ private:
 	Prediction m_prediction;
 	ImageTransformation m_imageTransform;
     server m_server;
+	cv::Ptr<cv::BackgroundSubtractor> pBgSub; // THE SAME BASE CLASS
 
 
     int m_frameCounter = 0;

@@ -84,7 +84,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;ext\websocketpp;ext\boost;ext\cpp-json\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;ext\websocketpp;ext\boost;ext\cpp-json\lib\include;ext\BackgroundSubtractorCNT;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -117,7 +117,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;ext\websocketpp;ext\boost;ext\cpp-json\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%OPENCV_DIR%/include/;ext\eigen3;ext\websocketpp;ext\boost;ext\cpp-json\lib\include;ext\BackgroundSubtractorCNT;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="ext\BackgroundSubtractorCNT\bgsubcnt.cpp" />
     <ClCompile Include="ImageTransformation.cpp" />
     <ClCompile Include="MotionController.cpp" />
     <ClCompile Include="Prediction.cpp" />
@@ -145,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="Config.h" />
     <ClInclude Include="definitions.h" />
+    <ClInclude Include="ext\BackgroundSubtractorCNT\bgsubcnt.h" />
     <ClInclude Include="ImageTransformation.h" />
     <ClInclude Include="MotionController.h" />
     <ClInclude Include="Prediction.h" />
