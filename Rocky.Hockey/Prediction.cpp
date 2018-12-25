@@ -4,6 +4,7 @@
 
 Prediction::Prediction()
 {
+	auto config = Config::get();
     //We can skip the right wall, because it's the user side wall.
     //We don't need to predict the movement in this direction
     m_walls = {
@@ -41,7 +42,9 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
     //Check backward movement
     Vector directionMean = puck.getDirection();
     //std::cout << "DirMean [" << directionMean.x() << "," << directionMean.y() << "]" << std::endl;
-    
+	m_reflections.clear();
+	m_reflections.reserve(3);
+
     if (directionMean.x() > 0 || directionMean.hasNaN()) {
         //std::cout << "[Prediction] Puck is moving backwards. Clear the history" << std::endl;
         //puck.resetPosition();
@@ -53,6 +56,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
     }
 
     Vector intersection;
+
     std::cout << std::endl;
 
     //Let's do 3 bounces.
@@ -72,7 +76,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         //Check Wall Intersections
         for (const Wall &wall : m_walls) {
             j++;
-
+			m_reflections.push_back({ position, direction });
             Line trajectoryLine = Line::Through(position, trajectory);
             cv::line(dst, Vector2Point(position), Vector2Point(trajectory), cv::Scalar(0, 0, 255), 1);
 
@@ -168,6 +172,26 @@ void Prediction::setFieldSize(const cv::Size & size)
         Vector(20, size.height),
         Vector(1,0)
     };
+}
+
+std::vector<Reflection> Prediction::getReflections() const
+{
+	return m_reflections;
+}
+
+Vector Prediction::getPredictedPosition() const
+{
+	return m_predictedPosition;
+}
+
+std::array<Wall, 4> Prediction::getWalls() const
+{
+	return m_walls;
+}
+
+Wall Prediction::getDefendLine() const
+{
+	return m_defendLine;
 }
 
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <cpp-json/json.h>
 
 class Config
 {
@@ -7,7 +8,7 @@ public:
 	int camWidth = 320;
 	int camHeight = 240;
 	int camFPS = 120;
-	int targetFPS = 10;
+	int targetFPS = 60;
 	int fieldWidth = 320;
 	int fieldHeight = 240;
 	int wrongDetectionThreshold = 10;
@@ -24,6 +25,9 @@ public:
 		}
 		return d;
 	};
+
+	json::object asJson();
+
 	Config() = default;
 };
 

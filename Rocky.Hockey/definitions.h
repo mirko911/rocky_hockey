@@ -4,16 +4,19 @@
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include "Config.h"
+#include <cpp-json/json.h>
+
 
 typedef Eigen::Vector2f Vector;
 typedef Eigen::Hyperplane<float, 2> Line;
+
 
 static constexpr struct ConfigLegacy {
     int camWidth = 480;
     int camHeight = 240;
     int targetFPS = 10;
-    int fieldWidth = 1000;
-    int fieldHeight = 1000;
+    int fieldWidth = 320;
+    int fieldHeight = 240;
     int wrongDetectionThreshold = 10;
     int puckRadius = 8;
 } config;
@@ -45,6 +48,13 @@ inline Vector getMean(const std::deque<Vector>& queue)
 
 inline std::string printVector(const Vector& vector) {
     return "[" + std::to_string(vector.x()) + "," + std::to_string(vector.y()) + "]";
+}
+
+inline json::object toJson(const Vector& vector) {
+	return  {
+		{"x", vector.hasNaN() ? json::value::type_null : vector.x()},
+		{"y", vector.hasNaN() ? json::value::type_null : vector.y()},
+	};
 }
 
 inline bool isInsideWall(const Wall& wall, const Vector& vector) {
