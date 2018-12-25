@@ -103,7 +103,7 @@ function onClose(e){
 
 function onMessage(e) {
   data = JSON.parse(e.data);
-  setHTML(settings, data.settings);
+  setHTML(settings, data);
   setHTML(puckPos, data.puck.position, false);
   setHTML(puckDir, data.puck.direction, false)
   setHTML(predictedPosition, data.prediction.predictedPosition, false);
