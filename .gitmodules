@@ -7,6 +7,3 @@
 [submodule "Rocky.Hockey/ext/cpp-json"]
 	path = Rocky.Hockey/ext/cpp-json
 	url = https://github.com/eteran/cpp-json.git
-[submodule "Rocky.Hockey/ext/BackgroundSubtractorCNT"]
-	path = Rocky.Hockey/ext/BackgroundSubtractorCNT
-	url = https://github.com/sagi-z/BackgroundSubtractorCNT.git
