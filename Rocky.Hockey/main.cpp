@@ -4,7 +4,7 @@ int main() {
 	//Make sure we got a config object before we start with rockyHockey
 	Config::get();
 
-    RockyHockeyMain rockyhockey("../demo_4.mkv");
+    RockyHockeyMain rockyhockey(0);
 
     rockyhockey.Init();
     rockyhockey.Run();
