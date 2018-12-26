@@ -7,8 +7,8 @@ class Config
 public:
 	int camWidth = 320;
 	int camHeight = 240;
-	int camFPS = 120;
-	int targetFPS = 10;
+	int camFPS = 60;
+	int targetFPS = 60;
 	int fieldWidth = 320;
 	int fieldHeight = 240;
 	int wrongDetectionThreshold = 10;

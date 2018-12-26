@@ -14,7 +14,9 @@ set(CMAKE_BUILD_TYPE RELEASE)
 include_directories(${CMAKE_SOURCE_DIR}/Rocky.Hockey/ext/eigen3/)
 include_directories(${CMAKE_SOURCE_DIR}/Rocky.Hockey/ext/cpp-json/lib/include)
 include_directories(${CMAKE_SOURCE_DIR}/Rocky.Hockey/ext/websocketpp/)
+include_directories(${CMAKE_SOURCE_DIR}/Rocky.Hockey/ext/BackgroundSubtractorCNT/)
 
+FIND_LIBRARY(BGSUBCNT_LIB bgsubcnt "/usr/local/lib")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "-O3")        ## Optimize
@@ -43,6 +45,8 @@ set(SOURCE_FILES
 	Rocky.Hockey/Prediction.h
 	Rocky.Hockey/ImageTransformation.h
     Rocky.Hockey/ImageTransformation.cpp
+	Rocky.Hockey/ext/BackgroundSubtractorCNT/bgsubcnt.cpp
+	Rocky.Hockey/ext/BackgroundSubtractorCNT/bgsubcnt.h
         )
 
 add_executable(rocky_hockey ${SOURCE_FILES})
@@ -50,5 +54,7 @@ add_executable(rocky_hockey ${SOURCE_FILES})
 target_link_libraries(rocky_hockey ${OpenCV_LIBS})
 target_link_libraries(rocky_hockey ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(rocky_hockey ${Boost_LIBRARIES})
+target_link_libraries (rocky_hockey ${BGSUBCNT_LIB} ${OpenCV_LIBS})
+
 #target_link_libraries (rocky_hockey Eigen3::Eigen)
 
