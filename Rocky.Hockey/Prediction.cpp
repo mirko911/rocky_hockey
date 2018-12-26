@@ -45,6 +45,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         //puck.resetPosition();
         puck.resetDirection();
         puck.resetVelocity();
+		m_positions.clear();
         m_predictedPosition = Vector(NAN, NAN);
         m_predictionQueue.clear();
         return;
@@ -59,6 +60,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
     int i = 0;
     int j = 0;
     bool foundIntersection = false;
+	m_positions.push_back(puck.getPosition());
     while(i < 3 && !foundIntersection){
         //Redefine Vars
         Vector direction = puck.getDirection();
@@ -132,7 +134,9 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
 		m_predictedPosition = getMean(m_predictionQueue);
 		cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
 	}
-    
+    for(const auto &position: m_positions)
+		cv::circle(dst, Vector2Point(position), 3, cv::Scalar(0, 255, 255), 1, 8, 0);
+
     cv::line(dst, Vector2Point(m_defendLine.start), Vector2Point(m_defendLine.end), cv::Scalar(0, 255, 255), 1, 8);
 
 }
@@ -163,9 +167,9 @@ void Prediction::setFieldSize(const cv::Size & size)
 
     //Defind line with random magic numbers 
     m_defendLine = {
-        Line::Through(Vector(20, 0), Vector(20, size.height)),
-        Vector(20, 0),
-        Vector(20, size.height),
+        Line::Through(Vector(50, 0), Vector(50, size.height)),
+        Vector(50, 0),
+        Vector(50, size.height),
         Vector(1,0)
     };
 }

@@ -69,8 +69,8 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 
 		Vector oldPosition = puck.getPosition();
 		if (oldPosition.hasNaN()) {
-			oldPosition = position;
 			puck.setPosition(position);
+			return false;
 		}
 
 		//Calculate mean of all old directions and blend them with a 2:1 ratio into a new direction
@@ -83,7 +83,7 @@ bool Tracker::Tick(const cv::Mat & src, cv::Mat &dst, Puck & puck)
 		float distance = direction.norm();
 
 		//Pass new vectors to puck class
-		if (distance >= 5.0f) {
+		if (distance >= 3.0f) {
 			puck.setPosition(position);
 			puck.setDirection(direction);
 		}

@@ -18,6 +18,7 @@ private:
     std::deque<Vector> m_predictionQueue;
 	std::vector<Reflection> m_reflections;
     Wall m_defendLine;
+	std::vector<Vector> m_positions;
 public:
     Prediction();
     void tick(cv::Mat &dst, Puck &puck);
