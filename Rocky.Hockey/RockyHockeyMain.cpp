@@ -123,14 +123,6 @@ void RockyHockeyMain::Run()
     cv::namedWindow("display", cv::WINDOW_FREERATIO | cv::WINDOW_OPENGL);
     cv::Mat displayMat(m_imgSrc.size(), m_imgSrc.type());
 
-    cv::createTrackbar("Canny Low", "display", &cannyLow, cannyMax);
-    cv::createTrackbar("Canny High", "display", &cannyHigh, cannyMax);
-    cv::createTrackbar("DP", "display", &m_tracker.dp, m_tracker.dpLimit);
-    cv::createTrackbar("thres1", "display", &m_tracker.threshold1, m_tracker.thresholdLimit);
-    cv::createTrackbar("thres2", "display", &m_tracker.threshold2, m_tracker.thresholdLimit);
-    cv::createTrackbar("minArea", "display", &m_tracker.minArea, m_tracker.areaLimit);
-    cv::createTrackbar("maxArea", "display", &m_tracker.maxArea, m_tracker.areaLimit);
-
     int key = -1;
     while (!m_exit)
     {
