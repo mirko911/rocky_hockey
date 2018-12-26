@@ -33,7 +33,7 @@ bool SerialConnection::connect(const std::string & port_name, const int baud)
                 &boost::asio::io_service::run,
                 &m_io));
 #ifdef __linux__
-        pthread_setname_np(runner.native_handle(), "Serial Runner");
+        pthread_setname_np(m_runner.native_handle(), "Serial Runner");
 #endif
         startReceive();
     }
