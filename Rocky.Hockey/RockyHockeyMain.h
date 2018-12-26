@@ -55,7 +55,7 @@ private:
 	Prediction m_prediction;
 	ImageTransformation m_imageTransform;
     server m_server;
-	cv::Ptr<cv::BackgroundSubtractor> pBgSub; // THE SAME BASE CLASS
+	cv::Ptr<cv::BackgroundSubtractor> m_backgroundSubtractor; // THE SAME BASE CLASS
 
 
     int m_frameCounter = 0;

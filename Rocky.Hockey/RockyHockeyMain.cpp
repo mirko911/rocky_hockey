@@ -106,9 +106,11 @@ void RockyHockeyMain::Init()
         std::cerr << "[RockyHockeyMain] First frame is empty" << std::endl;
         m_exit = true;
     }
-    m_imgSrc.copyTo(m_imgDst);
 
-	pBgSub = cv::bgsubcnt::createBackgroundSubtractorCNT(60, true, 60 * 60 ,true);
+#ifndef BUILD_PI
+    m_imgSrc.copyTo(m_imgDst);
+#endif // !BUILD_PI
+	m_backgroundSubtractor = cv::bgsubcnt::createBackgroundSubtractorCNT(60, true, 60 * 60 ,true);
 
     m_workerThread = std::make_unique<std::thread>(&RockyHockeyMain::worker_thread, this);
 
@@ -120,8 +122,10 @@ void RockyHockeyMain::Run()
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point now;
 
-    cv::namedWindow("display", cv::WINDOW_FREERATIO | cv::WINDOW_OPENGL);
-    cv::Mat displayMat(m_imgSrc.size(), m_imgSrc.type());
+#ifndef BUILD_PI
+	cv::namedWindow("display", cv::WINDOW_FREERATIO | cv::WINDOW_OPENGL);
+	cv::Mat displayMat(m_imgSrc.size(), m_imgSrc.type());
+#endif // !BUILD_PI
 
     int key = -1;
     while (!m_exit)
@@ -132,13 +136,15 @@ void RockyHockeyMain::Run()
             onKeyPress(key);
         }
 
+#ifndef BUILD_PI
         {
             std::mutex m;
             std::lock_guard<std::mutex> lockGuard(m);
             m_imgDst.copyTo(displayMat);
         }
-
         cv::imshow("display", displayMat);
+#endif // !BUILD_PI
+
 
         /*
        ==================================================
@@ -160,8 +166,6 @@ void RockyHockeyMain::Fini()
     std::cout << std::endl << "[RockyHockeyMain] received exit signal" << std::endl;
 
     m_workerThread->join();
-	m_workerWebsocket->join();
-
     std::cout << "[RockyHockeyWorker] stopping worker threads" << std::endl;
 }
 
@@ -177,14 +181,15 @@ void RockyHockeyMain::worker_thread()
     if (Config::get()->targetFPS > 0)
         target_delta /= static_cast<float>(Config::get()->targetFPS);
 
-    std::string infoText = "";
-
     cv::Mat workingImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat undistImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat grayImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
     cv::Mat wrapImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
-    cv::Mat debugImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
+	cv::Mat debugImage = cv::Mat::zeros(m_imgSrc.size(), CV_8UC1);
+
+#ifndef BUILD_PI
     m_imgDst = cv::Mat::zeros(m_imgSrc.size(), CV_8UC3);
+#endif 
 
     m_prediction.setFieldSize(m_imageTransform.getFieldSize());
 
@@ -204,52 +209,48 @@ void RockyHockeyMain::worker_thread()
 
         cv::cvtColor(m_imgSrc, grayImage, cv::COLOR_BGR2GRAY);
 
-        infoText = "";
         if (Config::get()->undistortImage) {
             m_imageTransform.undistort(grayImage, undistImage);
-            infoText = "Undistored ";
         }
         else {
             undistImage = grayImage.clone();
-            infoText = "Distored ";
         }
 
         if (Config::get()->wrapImage) {
             m_imageTransform.warpPerspective(undistImage, wrapImage);
-            infoText += " Wrapped";
         }
         else {
             wrapImage = undistImage.clone();
-            infoText += " Unwrapped";
         }
 
-        wrapImage.copyTo(debugImage);
-        cvtColor(debugImage, debugImage, cv::COLOR_GRAY2BGR);
-
-
-        cv::putText(debugImage, infoText, cv::Point2f(10, 10), cv::FONT_HERSHEY_PLAIN, 0.4, cv::Scalar(255, 255, 255, 255));
+#ifndef BUILD_PI
+		wrapImage.copyTo(debugImage);
+		cvtColor(debugImage, debugImage, cv::COLOR_GRAY2BGR);
+#endif // !BUILD_PI
 
 
         workingImage = wrapImage;
         cv::GaussianBlur(workingImage, workingImage, cv::Size(5,5), 0, 0, 4);
 		cv::dilate(workingImage, workingImage, 0);
 		cv::erode(workingImage, workingImage, 0);
-		pBgSub->apply(workingImage, workingImage);
+		m_backgroundSubtractor->apply(workingImage, workingImage);
 
         cv::Canny(workingImage, workingImage, cannyLow, cannyHigh);
 
 		sendWSHeartBeat();
 
-	
+
         m_tracker.Tick(workingImage, debugImage, m_puck);
 		//m_prediction.setFieldSize(m_imageTransform.getFieldSize());
         m_prediction.tick(debugImage, m_puck);
 
-        {
-            std::mutex m;
-            std::lock_guard<std::mutex> lockGuard(m);
-            m_imgDst = debugImage.clone(); //cv::Mat::zeros(wrapImage.size(), CV_8UC3);
-        }
+#ifndef BUILD_PI
+		{
+			std::mutex m;
+			std::lock_guard<std::mutex> lockGuard(m);
+			m_imgDst = debugImage.clone(); //cv::Mat::zeros(wrapImage.size(), CV_8UC3);
+		}
+#endif // !BUILD_PI
 
         /*
         ==================================================
