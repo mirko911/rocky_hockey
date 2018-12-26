@@ -20,11 +20,6 @@ Prediction::Prediction()
             Vector(Config::get()->fieldWidth, Config::get()->fieldHeight),
             Vector(0, 1),
         },
-       // Wall{ //not sure if we need the third wall, because we should get an intersection with the defend
-       // Line before we hit the wall
-      //      Line::Through(Vector(0,0), Vector(0, Config::get()->fieldHeight)), //LEFT Wall
-      //      Vector(1, 0),
-       // },
     };
 
     //Defind line with random magic numbers 
@@ -115,7 +110,7 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
 				continue;
 			}
 			else if (!isInsideWall(wall, intersection)) {
-				std::cerr << "Wrong intersection (outside wall)" << j << printVector(intersection)  << std::endl;
+				std::cerr << "Wrong intersection (outside wall)" << j << printVector(intersection) << " " << printVector(wall.end) << std::endl;
 				continue;
 			}
 
@@ -132,14 +127,12 @@ void Prediction::tick(cv::Mat &dst, Puck & puck)
         }
         i++;
     }
+
 	if (m_predictionQueue.size() >= 4) {
 		m_predictedPosition = getMean(m_predictionQueue);
 		cv::circle(dst, Vector2Point(m_predictedPosition), 3, cv::Scalar(255, 255, 255), 3, 8, 0);
 	}
     
-
-    for (const Wall &wall : m_walls) {
-    }
     cv::line(dst, Vector2Point(m_defendLine.start), Vector2Point(m_defendLine.end), cv::Scalar(0, 255, 255), 1, 8);
 
 }
@@ -149,13 +142,13 @@ void Prediction::setFieldSize(const cv::Size & size)
     //Adjust the wall positions, because we use the center of the circle for the
     //calculation. Therefore we need to subtract 0.5Radius from the wall.
     //Subtract -1, because we start with zero and not with 1
-    int width = size.width - Config::get()->puckRadius - 1;
-    int height = size.height - Config::get()->puckRadius -1;
-    int zero = 0 + static_cast<int>(Config::get()->puckRadius);
+    float width = size.width - Config::get()->puckRadius - 1.0f;
+    float height = size.height - Config::get()->puckRadius -1.0f;
+    float zero = 0.0f + Config::get()->puckRadius;
 
     m_walls = {
            Wall{
-               Line::Through(Vector(zero,zero), Vector(width,0)), //TOP Wall
+               Line::Through(Vector(zero,zero), Vector(width, zero)), //TOP Wall
                Vector(zero,zero),
                Vector(width,zero),
                Vector(0, -1),
@@ -165,12 +158,7 @@ void Prediction::setFieldSize(const cv::Size & size)
                Vector(zero, height),
                Vector(width, height),
                Vector(0, 1),
-           },
-           //not sure if we need the third wall, because we should get an intersection with the defend
-           // Wall{ 
-           //      Line::Through(Vector(0,0), Vector(0, Config::get()->fieldHeight)), //LEFT Wall
-           //      Vector(1, 0),
-           // },
+           }
     };
 
     //Defind line with random magic numbers 
